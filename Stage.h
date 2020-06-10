@@ -2,12 +2,11 @@
 #define __STAGE__
 #include <ncurses.h>
 #include <iostream>
-#include <deque>
 
 //방향키 인덱스 정의
 #define UP 8
-#define RIGHT 6
 #define DOWN 2
+#define RIGHT 6
 #define LEFT 4
 
 //항목별 인덱스 정의
@@ -24,33 +23,40 @@ using namespace std;
 
 class Stage
 {
-    int Map[4][21][21];
-
 public:
+    WINDOW *win;
+    WINDOW *game;
+    WINDOW *score;
+    WINDOW *mission;
+
+    int ***stage;
+
     Stage();
-    void printStage();
+    ~Stage();
+    int getStageNum() const { return STAGE_NUM; }
+    int getMapRow() const { return MAP_ROW; }
+    int getMapCol() const { return MAP_COL; }
+    int getNlines() const { return NLINES; }
+    int getNcols() const { return NCOLS; }
+    void setMap(int ***&stage);
+    int **copyMap(int nStage);
+    void drawMap(int scrX, int scrY, int **map);
+
     void setMission();
-    void isMissionClear();
+    void drawMission();
     void pause();
     void resume();
+
     void Move(int direction);
     void makeItem();
-    void drawMap(int** map);
-};
-
-class Gate
-{
     void makeGate();
-};
+    void isMissionClear();
 
-class Snake
-{
-    deque<int> snake;
-public:
-    void makeSnake();
-    void moveSnake();
-    void moveGate();
-    void eatGrowthItem(){};
-    void eatPoisonItem();
+private:
+    const int STAGE_NUM = 4; //스테이지 개수
+    const int MAP_ROW = 25,
+              MAP_COL = 25; //맵 세로, 가로 길이
+    const int NLINES = 40,
+              NCOLS = 120;
 };
 #endif
