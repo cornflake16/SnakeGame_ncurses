@@ -100,8 +100,8 @@ int **Stage::copyMap(int nStage)
 
 void Stage::drawMap(int srcY, int srcX, int **map)
 {
-    string itemIndex = ".^X@=+-%";
-    int height = (NLINES - 1) / 1.5, width = (NCOLS - 1) / 1.5;
+    string itemIndex = " ^X@=+-%";
+    int height = NLINES / 1.5 - 1, width = NCOLS / 1.5 - 1;
 
     win = newwin(NLINES-1, NCOLS-1, 0, 0);
     box(win, 0, 0);
@@ -109,24 +109,30 @@ void Stage::drawMap(int srcY, int srcX, int **map)
     game = newwin(height, width, 6, 5);
     for (int i = 0; i < MAP_ROW; i++)
     {
-        for (int j = 0; j < MAP_COL*3; j+=3)
+        for (int j = 0; j < MAP_COL; j++)
         {
-            int index = map[i][j/3];
+            int index = map[i][j];
             wattron(game, COLOR_PAIR(index));
-            mvwaddch(game, i, j, ' ');
-            mvwaddch(game, i, j+1, itemIndex[index]);
-            mvwaddch(game, i, j+2, ' ');
+            mvwaddch(game, i, j, itemIndex[index]);
             wattroff(game, COLOR_PAIR(index));
         }
         printw("\n");
     }
-    score = newwin(18, 30, 1, 84);
+    score = newwin(17, 30, 2, 84);
     box(score, 0, 0);
     mvwprintw(score, 0, 10, "[ SCORE ]");
-
-    mission = newwin(18, 30, 20, 84);
+    mvwprintw(score, 3, 5, "B: ");
+    mvwprintw(score, 6, 5, "+: ");
+    mvwprintw(score, 9, 5, "-: ");
+    mvwprintw(score, 12, 5, "G: ");
+    
+    mission = newwin(17, 30, 20, 84);
     box(mission, 0, 0);
     mvwprintw(mission, 0, 9, "[ MISSION ]");
+    mvwprintw(mission, 3, 5, "B: ");
+    mvwprintw(mission, 6, 5, "+: ");
+    mvwprintw(mission, 9, 5, "-: ");
+    mvwprintw(mission, 12, 5, "G: ");
 
     wrefresh(win);
     wrefresh(game);
