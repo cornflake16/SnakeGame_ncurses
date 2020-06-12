@@ -55,7 +55,7 @@ public:
 private:
     const int STAGE_NUM = 4; //스테이지 개수
     const int MAP_ROW = 25,
-              MAP_COL = 25; //맵 세로, 가로 길이
+              MAP_COL = 50; //맵 세로, 가로 길이
     const int NLINES = 40,
               NCOLS = 120;
 };
