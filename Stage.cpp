@@ -1,15 +1,15 @@
 #include "Stage.h"
-
+WINDOW *create_newwin(int height, int width, int starty, int startx);
 Stage::Stage()
 {
     initscr();
-    keypad(stdscr, 1);
-    curs_set(0);
     resize_term(NLINES, NCOLS);
+    keypad(stdscr, TRUE);
+    curs_set(0);
     cbreak();
     noecho();
-    start_color();
 
+    start_color();
     if (has_colors() == FALSE) //사용자의 터미널(커맨드)에서 색상을 지원하지 않는다면 종료
     {
         endwin();
@@ -31,12 +31,13 @@ Stage::Stage()
     init_pair(GROWTH_ITEM, COLOR_YELLOW, COLOR_RED);     //5(+ 아이템): 노랑, 빨강
     init_pair(POISON_ITEM, COLOR_RED, COLOR_MAGENTA);    //6(- 아이템) 빨강, 분홍
     init_pair(GATE, COLOR_CYAN, COLOR_CYAN);             //7(목표+캐릭터):  형광, 형광
-    refresh();
 }
 Stage::~Stage()
 {
-    delwin(win);
+    delwin(mission);
+    delwin(score);
     delwin(game);
+    delwin(win);
     int i, j;
     for (i = 0; i < STAGE_NUM; i++)
     {
@@ -46,7 +47,6 @@ Stage::~Stage()
     }
     delete[] stage;
 }
-
 void Stage::drawMission()
 {
 }
@@ -98,15 +98,12 @@ int **Stage::copyMap(int nStage)
     return m;
 }
 
-void Stage::drawMap(int srcY, int srcX, int **map)
+void Stage::drawMap(int **map)
 {
     string itemIndex = " ^X@=+-%";
-    int height = NLINES / 1.5 - 1, width = NCOLS / 1.5 - 1;
+    int height = NLINES / 1.5 - 1, width = NCOLS / 1.5 - 23;
 
-    win = newwin(NLINES-1, NCOLS-1, 0, 0);
-    box(win, 0, 0);
-
-    game = newwin(height, width, 6, 5);
+    game = newwin(height, width, 7, 11);
     for (int i = 0; i < MAP_ROW; i++)
     {
         for (int j = 0; j < MAP_COL; j++)
@@ -118,26 +115,71 @@ void Stage::drawMap(int srcY, int srcX, int **map)
         }
         printw("\n");
     }
-    score = newwin(17, 30, 2, 84);
-    box(score, 0, 0);
-    mvwprintw(score, 0, 10, "[ SCORE ]");
-    mvwprintw(score, 3, 5, "B: ");
-    mvwprintw(score, 6, 5, "+: ");
-    mvwprintw(score, 9, 5, "-: ");
-    mvwprintw(score, 12, 5, "G: ");
-    
-    mission = newwin(17, 30, 20, 84);
-    box(mission, 0, 0);
-    mvwprintw(mission, 0, 9, "[ MISSION ]");
-    mvwprintw(mission, 3, 5, "B: ");
-    mvwprintw(mission, 6, 5, "+: ");
-    mvwprintw(mission, 9, 5, "-: ");
-    mvwprintw(mission, 12, 5, "G: ");
-
-    wrefresh(win);
+    drawBorders();
     wrefresh(game);
-    wrefresh(score);
-    wrefresh(mission);
+    mvprintw(3, 80, "[ SCORE ]");
+    mvprintw(20, 79, "[ MISSION ]");
+}
+
+void Stage::appearItem(int **&map)
+{
+    int nItem = rand() % 3 + 1;
+    pair<int, int> item[nItem];
+    int row, col;
+    for (int i = 0; i < sizeof(item) / sizeof(item[0]); i++)
+    {
+        int itemType = rand() % 2 + 5;
+        while (1)
+        {
+            row = rand() % MAP_ROW;
+            col = rand() % MAP_COL;
+            if (map[row][col] == EMPTY)
+                break;
+        }
+        item[i].first = row;
+        item[i].second = col;
+        map[item[i].first][item[i].second] = itemType;
+    }
+}
+
+void Stage::appearGate(int **&map)
+{
+    pair<int, int> gate[2];
+    int n, row, col;
+    int y, x;
+    for (int i = 0; i < 2; i++)
+    {
+        while (1)
+        {
+            n = rand() % 4;
+            row = rand() % MAP_ROW;
+            col = rand() % MAP_COL;
+            switch (n)
+            {
+            case 0: // 상단 벽
+                y = 0;
+                x = col;
+                break;
+            case 1: // 좌측
+                y = row;
+                x = 0;
+                break;
+            case 2: // 우측
+                y = row;
+                x = MAP_COL - 1;
+                break;
+            case 3: // 하단
+                y = MAP_ROW - 1;
+                x = col;
+                break;
+            }
+            if (map[y][x] == WALL)
+                break;
+        }
+        gate[i].first = y;
+        gate[i].second = x;
+        map[gate[i].first][gate[i].second] = GATE;
+    }
 }
 
 void Stage::pause()
@@ -147,6 +189,26 @@ void Stage::pause()
 void Stage::resume()
 {
 }
+
 void Stage::Move(int direction)
 {
+}
+
+void Stage::drawBorders()
+{
+    refresh();
+    create_newwin(NLINES - 1, NCOLS - 1, 0, 0);
+    create_newwin(16, 30, 3, 70);
+    create_newwin(16, 30, 20, 70);
+}
+
+WINDOW *create_newwin(int height, int width, int starty, int startx)
+{
+    WINDOW *local_win;
+
+    local_win = newwin(height, width, starty, startx);
+    box(local_win, 0, 0);
+
+    wrefresh(local_win);
+    return local_win;
 }
