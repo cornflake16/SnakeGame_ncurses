@@ -2,6 +2,9 @@
 #define __STAGE__
 #include <ncurses.h>
 #include <iostream>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
 
 //방향키 인덱스 정의
 #define UP 8
@@ -38,9 +41,10 @@ public:
     int getMapCol() const { return MAP_COL; }
     int getNlines() const { return NLINES; }
     int getNcols() const { return NCOLS; }
-    void setMap(int ***&stage);
-    int **copyMap(int nStage);
-    void drawMap(int scrX, int scrY, int **map);
+    void setMap(int***& stage);
+    int** copyMap(int nStage);
+    void drawMap(int** map);
+    void drawBorders();
 
     void setMission();
     void drawMission();
@@ -48,8 +52,9 @@ public:
     void resume();
 
     void Move(int direction);
-    void makeItem();
-    void makeGate();
+    void appearItem(int**& map);
+
+    void appearGate(int**& map);
     void isMissionClear();
 
 private:
@@ -57,6 +62,6 @@ private:
     const int MAP_ROW = 25,
               MAP_COL = 50; //맵 세로, 가로 길이
     const int NLINES = 40,
-              NCOLS = 120;
+              NCOLS = 110;
 };
 #endif
