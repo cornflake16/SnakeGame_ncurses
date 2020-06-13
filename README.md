@@ -1,2 +1,2 @@
 # SnakeGame_ncurses
-<img width="500" alt="스크린샷 2020-06-10 오후 1 28 04" src="https://user-images.githubusercontent.com/2377324/84227057-629c4b00-ab1e-11ea-8251-bec30753a199.png">
+<img width="789" alt="스크린샷 2020-06-13 오후 5 19 21" src="https://user-images.githubusercontent.com/2377324/84563921-14937b80-ad9a-11ea-985d-151ccf13dff7.png">
