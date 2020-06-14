@@ -1,4 +1,5 @@
 #include "Stage.h"
+
 int **map;
 int key;
 pair<int, int> gate[2];
@@ -10,9 +11,12 @@ int main()
     map = view.copyMap(0);
     view.appearGate(map);
     view.appearItem(map);
+    view.makeSnake(map);
+    // view.makeSnake();
     do
     {
-        view.drawMap(map);
+      view.Move(key,map);
+      view.drawMap(map);
     } while ((key = getch()) != 27);
     endwin();
     return 0;

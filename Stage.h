@@ -5,6 +5,7 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+#include "Something.h"
 
 //방향키 인덱스 정의
 #define UP 8
@@ -34,6 +35,8 @@ public:
 
     int ***stage;
 
+    Something* Bam;
+
     Stage();
     ~Stage();
     int getStageNum() const { return STAGE_NUM; }
@@ -46,12 +49,14 @@ public:
     void drawMap(int** map);
     void drawBorders();
 
+    void makeSnake(int **map);
+
     void setMission();
     void drawMission();
     void pause();
     void resume();
 
-    void Move(int direction);
+    void Move(int direction,int** map);
     void appearItem(int**& map);
 
     void appearGate(int**& map);

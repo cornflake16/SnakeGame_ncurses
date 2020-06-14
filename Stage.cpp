@@ -190,8 +190,41 @@ void Stage::resume()
 {
 }
 
-void Stage::Move(int direction)
+void Stage::Move(int direction,int** map)
 {
+  map[Bam->y][Bam->x] = 0;
+  //한칸씩 이동시켜야함
+  Something* q = Bam;
+  Something* p = Bam->link;
+  while(p->link != NULL){
+    q->x = p->x; q->y = p->y;
+    q = p;
+    p = p->link;
+  }
+  if(direction == 65 || direction == 97){
+    map[p->y][p->x] = q->who;
+    q->x = p->x; q->y = p->y;
+    p->x -=1;
+    map[p->y][p->x] = p->who;
+  }
+  else if(direction == 87 || direction == 119){
+    map[p->y][p->x] = q->who;
+    q->x = p->x; q->y = p->y;
+    p->y -=1;
+    map[p->y][p->x] = p->who;
+  }
+  else if(direction == 68 || direction == 100){
+    map[p->y][p->x] = q->who;
+    q->x = p->x; q->y = p->y;
+    p->x +=1;
+    map[p->y][p->x] = p->who;
+  }
+  else if(direction == 83 || direction == 115){
+    map[p->y][p->x] = q->who;
+    q->x = p->x; q->y = p->y;
+    p->y +=1;
+    map[p->y][p->x] = p->who;
+  }
 }
 
 void Stage::drawBorders()
@@ -211,4 +244,24 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
 
     wrefresh(local_win);
     return local_win;
+}
+
+void Stage::makeSnake(int **map){
+  string itemIndex = " ^X@=+-%";
+  int row = 13;
+  int col = 26;
+  Bam = new Something(row,col--,SNAKE_BODY);
+  Something* p = new Something(row,col--,SNAKE_BODY);
+  Bam -> link = p;
+  p = new Something(row,col--,SNAKE_BODY);
+  Bam -> link -> link = p;
+  p = new Something(row,col,SNAKE_HEAD);
+  Bam->link->link->link = p;
+  map[Bam->y][Bam->x] = Bam->who;
+  p = Bam-> link;
+  map[p->y][p->x] = p->who;
+  p = p->link;
+  map[p->y][p->x] = p->who;
+  p = p->link;
+  map[p->y][p->x] = p->who;
 }
