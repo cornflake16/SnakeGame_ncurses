@@ -205,26 +205,23 @@ void Stage::Move(int direction,int** map)
     map[p->y][p->x] = q->who;
     q->x = p->x; q->y = p->y;
     p->x -=1;
-    map[p->y][p->x] = p->who;
   }
   else if(direction == 87 || direction == 119){
     map[p->y][p->x] = q->who;
     q->x = p->x; q->y = p->y;
     p->y -=1;
-    map[p->y][p->x] = p->who;
   }
   else if(direction == 68 || direction == 100){
     map[p->y][p->x] = q->who;
     q->x = p->x; q->y = p->y;
     p->x +=1;
-    map[p->y][p->x] = p->who;
   }
   else if(direction == 83 || direction == 115){
     map[p->y][p->x] = q->who;
     q->x = p->x; q->y = p->y;
     p->y +=1;
-    map[p->y][p->x] = p->who;
   }
+  map[p->y][p->x] = p->who;
 }
 
 void Stage::drawBorders()
