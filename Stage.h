@@ -36,6 +36,8 @@ public:
     int ***stage;
 
     Something* Bam;
+    Something* gate1;
+    Something* gate2;
 
     Stage();
     ~Stage();
@@ -56,11 +58,20 @@ public:
     void pause();
     void resume();
 
+    void EatItem(int item,int dir,int**map);
+
     void Move(int direction,int** map);
     void appearItem(int**& map);
 
     void appearGate(int**& map);
+    void Gate(Something* head,int** map, int dir);
     void isMissionClear();
+
+    int checkBody(){return Body;}
+    bool checkfinish(){return finish;}
+    void Gameover();
+
+    int findRoot(Something* gate,int dir,int** map);
 
 private:
     const int STAGE_NUM = 4; //스테이지 개수
@@ -68,5 +79,7 @@ private:
               MAP_COL = 50; //맵 세로, 가로 길이
     const int NLINES = 40,
               NCOLS = 110;
+    int Body;
+    bool finish;
 };
 #endif

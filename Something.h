@@ -8,7 +8,7 @@ Something(int row,int col,int what){
   who = what;
   y = row;
   x = col;
-  link = NULL;
+  link = 0;
 }
 friend class Stage;
 };

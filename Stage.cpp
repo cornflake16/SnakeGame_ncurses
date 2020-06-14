@@ -2,6 +2,7 @@
 WINDOW *create_newwin(int height, int width, int starty, int startx);
 Stage::Stage()
 {
+    finish = false;
     initscr();
     resize_term(NLINES, NCOLS);
     keypad(stdscr, TRUE);
@@ -179,6 +180,12 @@ void Stage::appearGate(int **&map)
         gate[i].first = y;
         gate[i].second = x;
         map[gate[i].first][gate[i].second] = GATE;
+        if(i == 0){
+          gate1 = new Something(y,x,GATE);
+        }
+        if(i == 1){
+          gate2 = new Something(y,x,GATE);
+        }
     }
 }
 
@@ -193,7 +200,6 @@ void Stage::resume()
 void Stage::Move(int direction,int** map)
 {
   map[Bam->y][Bam->x] = 0;
-  //한칸씩 이동시켜야함
   Something* q = Bam;
   Something* p = Bam->link;
   while(p->link != NULL){
@@ -221,6 +227,15 @@ void Stage::Move(int direction,int** map)
     q->x = p->x; q->y = p->y;
     p->y +=1;
   }
+  if(map[p->y][p->x] == 5 || map[p->y][p->x] == 6){
+    EatItem(map[p->y][p->x],direction,map);
+  }
+  if(map[p->y][p->x] == 1 || map[p->y][p->x] == 2 || map[p->y][p->x] == 4){
+    Gameover();
+  }
+  if(map[p->y][p->x] == GATE){
+    Gate(p,map,direction);
+  }
   map[p->y][p->x] = p->who;
 }
 
@@ -244,21 +259,139 @@ WINDOW *create_newwin(int height, int width, int starty, int startx)
 }
 
 void Stage::makeSnake(int **map){
+  Body = 3;
   string itemIndex = " ^X@=+-%";
   int row = 13;
   int col = 26;
   Bam = new Something(row,col--,SNAKE_BODY);
   Something* p = new Something(row,col--,SNAKE_BODY);
   Bam -> link = p;
-  p = new Something(row,col--,SNAKE_BODY);
+  p = new Something(row,col--,SNAKE_HEAD);
   Bam -> link -> link = p;
-  p = new Something(row,col,SNAKE_HEAD);
-  Bam->link->link->link = p;
   map[Bam->y][Bam->x] = Bam->who;
   p = Bam-> link;
   map[p->y][p->x] = p->who;
   p = p->link;
   map[p->y][p->x] = p->who;
-  p = p->link;
-  map[p->y][p->x] = p->who;
+}
+
+void Stage::EatItem(int item,int dir,int** map){
+  if(item == 5){
+    if(Body == 10){
+      return;
+    }
+    Something* p = new Something(Bam->y,Bam->x,4);
+    if(dir == 65)
+      p->x++;
+    else if(dir == 87)
+      p->y++;
+    else if(dir == 68)
+      p->x--;
+    else if(dir == 83)
+      p->y--;
+    p->link = Bam;
+    Bam = p;
+    map[Bam->y][Bam->x] = Bam->who;
+    Body++;
+  }
+  else if(item == 6){
+    map[Bam->y][Bam->x] = 0;
+    Bam = Bam->link;
+    Body--;
+  }
+}
+
+void Stage::Gameover(){
+  finish = true;
+}
+
+void Stage::Gate(Something* head,int** map,int dir){
+  int root;
+  if(gate1->x == head->x && gate1->y == head->y){
+    if(gate2->x == 0){
+      head->x = 1; head->y = gate2->y;
+    }
+    else if(gate2->x == 49){
+      head->x = 48; head->y = gate2->y;
+    }
+    else if(gate2->y == 0){
+      head->x = gate2->x; head->y = 1;
+    }
+    else if(gate2->y == 24){
+      head->x = gate2->x; head->y = 23;
+    }
+    else{// 중간벽에 게이트가 있을시
+      root = findRoot(gate2,dir,map);
+      if(root == 65){
+        head->x = gate2->x-1;
+        head->y = gate2->y;
+      }
+      else if(root == 87){
+        head->x = gate2->x;
+        head->y = gate2->y-1;
+      }
+      else if(root == 68){
+        head->x = gate2->x+1;
+        head->y = gate2->y;
+      }
+      else if(root == 83){
+        head->x = gate2->x;
+        head->y = gate2->y+1;
+      }
+    }
+  }
+  else if(gate2->x == head->x && gate2->y == head->y){
+    if(gate1->x == 0){
+      head->x = 1; head->y = gate1->y;
+    }
+    else if(gate1->x == 49){
+      head->x = 48; head->y = gate1->y;
+    }
+    else if(gate1->y == 0){
+      head->x = gate1->x; head->y = 1;
+    }
+    else if(gate1->y == 24){
+      head->x = gate1->x; head->y = 23;
+    }
+    else{ // 중간벽에 게이트가 있을시
+      root = findRoot(gate1,dir,map);
+      if(root == 65){
+        head->x = gate1->x-1;
+        head->y = gate1->y;
+      }
+      else if(root == 87){
+        head->x = gate1->x;
+        head->y = gate1->y-1;
+      }
+      else if(root == 68){
+        head->x = gate1->x+1;
+        head->y = gate1->y;
+      }
+      else if(root == 83){
+        head->x = gate1->x;
+        head->y = gate1->y+1;
+      }
+    }
+  }
+}
+
+int Stage::findRoot(Something* gate,int dir,int** map){
+  for(int i =0;i<4;i++){
+    if(dir == 65){
+      if(map[gate->y][gate->x -1] == 0) return dir;
+      else dir = 87;
+    }
+    else if(dir == 87){
+      if(map[gate->y -1][gate->x] == 0) return dir;
+      else dir = 68;
+    }
+    else if(dir == 68){
+      if(map[gate->y][gate->x + 1]== 0) return dir;
+      else dir = 83;
+    }
+    else if(dir == 83){
+      if(map[gate->y +1][gate->x] == 0) return dir;
+      else dir = 65;
+    }
+  }
 }
