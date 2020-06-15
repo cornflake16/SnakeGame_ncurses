@@ -1,8 +1,9 @@
 # SnakeGame_ncurses
 <img width="699" alt="스크린샷 2020-06-16 오전 12 34 12" src="https://user-images.githubusercontent.com/2377324/84677072-2aa36680-af69-11ea-81bc-61cec12a238d.png">
 
-실행 방법
-  Terminal command: make -> ./run
+<실행 방법>
+터미널 명령어
+make -> ./run
 ----------------
 2020-06-13(토): 맵 출력, 문 생성, 아이템 생성 완료
 - 프로그램 실행 시, 초기에 맵이 정상적으로 안 뜨는 현상 해결(drawsBorder함수 추가)
