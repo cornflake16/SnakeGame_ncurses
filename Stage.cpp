@@ -385,16 +385,16 @@ void Stage::alert(int color, int bkgdColor, const string msg)
 void Stage::enterGate(Something *head, int **map)
 {
     if (gate1->x == head->x && gate1->y == head->y)
-    { // 중간벽에 게이트가 있을시
+    { 
         if (gate2->x == 0)
         {
             head->x = 1;
             head->y = gate2->y;
             dir = RIGHT;
         }
-        else if (gate2->x == 49)
+        else if (gate2->x == COL_END)
         {
-            head->x = 48;
+            head->x = COL_END - 1;
             head->y = gate2->y;
             dir = LEFT;
         }
@@ -404,12 +404,13 @@ void Stage::enterGate(Something *head, int **map)
             head->y = 1;
             dir = DOWN;
         }
-        else if (gate2->y == 24)
+        else if (gate2->y == ROW_END)
         {
             head->x = gate2->x;
-            head->y = 23;
+            head->y = ROW_END - 1;
             dir = UP;
         }
+        // 중간벽에 게이트가 있을시
         findRoot(gate2, map);
         if (dir == LEFT)
         {
@@ -440,9 +441,9 @@ void Stage::enterGate(Something *head, int **map)
             head->y = gate1->y;
             dir = RIGHT;
         }
-        else if (gate1->x == 49)
+        else if (gate1->x == COL_END)
         {
-            head->x = 48;
+            head->x = COL_END - 1;
             head->y = gate1->y;
             dir = LEFT;
         }
@@ -452,10 +453,10 @@ void Stage::enterGate(Something *head, int **map)
             head->y = 1;
             dir = DOWN;
         }
-        else if (gate1->y == 24)
+        else if (gate1->y == ROW_END)
         {
             head->x = gate1->x;
-            head->y = 23;
+            head->y = ROW_END - 1;
             dir = UP;
         }
         // 중간벽에 게이트가 있을시
