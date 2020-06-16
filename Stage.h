@@ -52,10 +52,10 @@ public:
     Stage();
     ~Stage();
     int getStageNum() const { return STAGE_NUM; }
-    int getMapRow() const { return MAP_ROW; }
-    int getMapCol() const { return MAP_COL; }
     int getNlines() const { return NLINES; }
     int getNcols() const { return NCOLS; }
+    int getMapRow() const { return MAP_ROW; }
+    int getMapCol() const { return MAP_COL; }
     void setMap(int ***&stage);
     int **copyMap(int nStage);
     void drawMap(int **map);
