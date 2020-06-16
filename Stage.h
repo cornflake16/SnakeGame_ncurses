@@ -42,7 +42,11 @@ public:
 
     // mission check variables
     char chkMission[4];
+<<<<<<< HEAD
 
+=======
+    
+>>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
     Something *Bam;
     Something *gate1;
     Something *gate2;
@@ -64,11 +68,19 @@ public:
 
     void eatItem(int item, int dir, int **map);
     void makeSnake(int **map);
+<<<<<<< HEAD
     void move(int **map);
 
     void appearItem(int **&map);
     void appearGate(int **&map);
     void enterGate(Something *head, int **map);
+=======
+    void move(int direction, int **map);
+
+    void appearItem(int **&map);
+    void appearGate(int **&map);
+    void enterGate(Something *head, int **map, int dir);
+>>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 
     pair<int, int> numOfItems(int **map);
     bool isMissionClear();
@@ -77,9 +89,13 @@ public:
     void Gameover();
     void alert(int color, int bkgdColor, const string msg);
 
+<<<<<<< HEAD
     void findRoot(Something *gate,int **map);
     void Setdir(int direction) {dir = direction;}
     int Getdir() { return dir;}
+=======
+    int findRoot(Something *gate, int dir, int **map);
+>>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 
 private:
     const int STAGE_NUM = 4; //스테이지 개수
