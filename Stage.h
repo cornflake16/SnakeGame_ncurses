@@ -13,6 +13,7 @@
 #define DOWN KEY_DOWN
 #define RIGHT KEY_RIGHT
 #define LEFT KEY_LEFT
+#define ESC 27
 
 //항목별 인덱스 정의
 #define EMPTY 0
@@ -30,6 +31,7 @@ class Stage
 {
 public:
     int ***stage;
+    int dir;
 
     // window variables
     WINDOW *game;
@@ -62,7 +64,7 @@ public:
     void pause();
     void resume();
 
-    void eatItem(int item, int dir, int **map);
+    void eatItem(int item, int **map);
     void makeSnake(int **map);
     void move(int **map);
 
@@ -73,13 +75,11 @@ public:
     pair<int, int> numOfItems(int **map);
     bool isMissionClear();
 
-    bool checkfinish() { return finish; }
+    bool checkGameOver() { return finish; }
     void Gameover();
     void alert(int color, int bkgdColor, const string msg);
 
-    void findRoot(Something *gate,int **map);
-    void Setdir(int direction) {dir = direction;}
-    int Getdir() { return dir;}
+    int findRoot(Something *gate, int **map);
 
 private:
     const int STAGE_NUM = 4; //스테이지 개수
@@ -92,6 +92,5 @@ private:
     const string itemIndex = " ^X@=+-%";
 
     bool finish;
-    int dir;
 };
 #endif
