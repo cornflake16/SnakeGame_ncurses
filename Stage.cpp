@@ -1,8 +1,5 @@
 #include "Stage.h"
-<<<<<<< HEAD
 #include <string.h>
-=======
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 Stage::Stage()
 {
     srand((unsigned)time(0));
@@ -168,11 +165,7 @@ void Stage::setMission()
     statMission[0] = rand() % 5 + 6; // 뱀 길이: 5~10
     statMission[1] = rand() % 5 + 4; // 증가 아이템 획득 횟수: 4~8
     statMission[2] = rand() % 4 + 3; // 감소 아이템 획득 횟수: 3~6
-<<<<<<< HEAD
     statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1 ~ 5
-=======
-    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1 ~ 5 
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 }
 
 bool Stage::isMissionClear()
@@ -271,7 +264,6 @@ void Stage::resume()
 {
 }
 
-<<<<<<< HEAD
 void Stage::move(int **map)
 {
   map[Bam->y][Bam->x] = EMPTY;
@@ -326,62 +318,6 @@ void Stage::move(int **map)
     enterGate(p, map);
   }
   map[p->y][p->x] = p->who;
-=======
-void Stage::move(int dir, int **map)
-{
-    map[Bam->y][Bam->x] = EMPTY;
-    Something *q = Bam;
-    Something *p = q->link;
-    while (p->link != NULL)
-    {
-        q->x = p->x;
-        q->y = p->y;
-        q = p;
-        p = p->link;
-    }
-    if (dir == LEFT || dir == 97)
-    {
-        map[p->y][p->x] = q->who;
-        q->x = p->x;
-        q->y = p->y;
-        p->x--;
-    }
-    else if (dir == UP || dir == 119)
-    {
-        map[p->y][p->x] = q->who;
-        q->x = p->x;
-        q->y = p->y;
-        p->y--;
-    }
-    else if (dir == RIGHT || dir == 100)
-    {
-        map[p->y][p->x] = q->who;
-        q->x = p->x;
-        q->y = p->y;
-        p->x++;
-    }
-    else if (dir == DOWN || dir == 115)
-    {
-        map[p->y][p->x] = q->who;
-        q->x = p->x;
-        q->y = p->y;
-        p->y++;
-    }
-    if (map[p->y][p->x] == GROWTH_ITEM || map[p->y][p->x] == POISON_ITEM)
-    {
-        eatItem(map[p->y][p->x], dir, map);
-    }
-    if (map[p->y][p->x] == WALL || map[p->y][p->x] == SNAKE_BODY)
-    {
-        map[p->y][p->x] = IMMUNE_WALL;
-        Gameover();
-    }
-    if (map[p->y][p->x] == GATE)
-    {
-        enterGate(p, map, dir);
-    }
-    map[p->y][p->x] = p->who;
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 }
 
 void Stage::makeSnake(int **map)
@@ -411,7 +347,6 @@ void Stage::eatItem(int item, int dir, int **map)
             return;
         }
         Something *p = new Something(Bam->y, Bam->x, SNAKE_BODY);
-<<<<<<< HEAD
         if (Bam->x - Bam->link->x == 1)
             p->x++;
         else if (Bam->y - Bam->link->y == 1)
@@ -419,15 +354,6 @@ void Stage::eatItem(int item, int dir, int **map)
         else if (Bam->x - Bam->link->x == -1)
             p->x--;
         else if (Bam->y - Bam->link->y == -1)
-=======
-        if (dir == LEFT)
-            p->x++;
-        else if (dir == UP)
-            p->y++;
-        else if (dir == RIGHT)
-            p->x--;
-        else if (dir == DOWN)
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
             p->y--;
         p->link = Bam;
         Bam = p;
@@ -460,7 +386,6 @@ void Stage::alert(int color, int bkgdColor, const string msg)
     usleep(1750000);
 }
 
-<<<<<<< HEAD
 void Stage::enterGate(Something *head, int **map)
 {
     if (gate1->x == head->x && gate1->y == head->y)
@@ -485,61 +410,10 @@ void Stage::enterGate(Something *head, int **map)
         {
             head->x = gate2->x;
             head->y = gate2->y + 1;
-=======
-void Stage::enterGate(Something *head, int **map, int dir)
-{
-    int root;
-    if (gate1->x == head->x && gate1->y == head->y)
-    {
-        if (gate2->x == 0)
-        {
-            head->x = 1;
-            head->y = gate2->y;
-        }
-        else if (gate2->x == COL_END)
-        {
-            head->x = COL_END - 1;
-            head->y = gate2->y;
-        }
-        else if (gate2->y == 0)
-        {
-            head->x = gate2->x;
-            head->y = 1;
-        }
-        else if (gate2->y == ROW_END)
-        {
-            head->x = gate2->x;
-            head->y = ROW_END - 1;
-        }
-        else
-        { // 중간벽에 게이트가 있을시
-            root = findRoot(gate2, dir, map);
-            if (root == LEFT)
-            {
-                head->x = gate2->x - 1;
-                head->y = gate2->y;
-            }
-            else if (root == UP)
-            {
-                head->x = gate2->x;
-                head->y = gate2->y - 1;
-            }
-            else if (root == RIGHT)
-            {
-                head->x = gate2->x + 1;
-                head->y = gate2->y;
-            }
-            else if (root == DOWN)
-            {
-                head->x = gate2->x;
-                head->y = gate2->y + 1;
-            }
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
         }
     }
     else if (gate2->x == head->x && gate2->y == head->y)
     {
-<<<<<<< HEAD
           // 중간벽에 게이트가 있을시
           findRoot(gate1,map);
           if (dir == LEFT)
@@ -562,68 +436,17 @@ void Stage::enterGate(Something *head, int **map, int dir)
               head->x = gate1->x;
               head->y = gate1->y + 1;
           }
-=======
-        if (gate1->x == 0)
-        {
-            head->x = 1;
-            head->y = gate1->y;
-        }
-        else if (gate1->x == COL_END)
-        {
-            head->x = COL_END - 1;
-            head->y = gate1->y;
-        }
-        else if (gate1->y == 0)
-        {
-            head->x = gate1->x;
-            head->y = 1;
-        }
-        else if (gate1->y == ROW_END)
-        {
-            head->x = gate1->x;
-            head->y = ROW_END - 1;
-        }
-        else
-        { // 중간벽에 게이트가 있을시
-            root = findRoot(gate1, dir, map);
-            if (root == LEFT)
-            {
-                head->x = gate1->x - 1;
-                head->y = gate1->y;
-            }
-            else if (root == UP)
-            {
-                head->x = gate1->x;
-                head->y = gate1->y - 1;
-            }
-            else if (root == RIGHT)
-            {
-                head->x = gate1->x + 1;
-                head->y = gate1->y;
-            }
-            else if (root == DOWN)
-            {
-                head->x = gate1->x;
-                head->y = gate1->y + 1;
-            }
-        }
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
     }
     stat[3]++;
 }
 
-<<<<<<< HEAD
 void Stage::findRoot(Something *gate, int **map)
-=======
-int Stage::findRoot(Something *gate, int dir, int **map)
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 {
     for (int i = 0; i < 4; i++)
     {
         if (dir == LEFT)
         {
             if (map[gate->y][gate->x - 1] == EMPTY)
-<<<<<<< HEAD
                 return;
             else
                 Setdir(UP);
@@ -634,47 +457,20 @@ int Stage::findRoot(Something *gate, int dir, int **map)
                 return;
             else
                 Setdir(RIGHT);
-=======
-                return dir;
-            else
-                dir = KEY_UP;
-        }
-        else if (dir == KEY_UP)
-        {
-            if (map[gate->y - 1][gate->x] == EMPTY)
-                return dir;
-            else
-                dir = RIGHT;
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
         }
         else if (dir == RIGHT)
         {
             if (map[gate->y][gate->x + 1] == EMPTY)
-<<<<<<< HEAD
                 return;
             else
                 Setdir(DOWN);
-=======
-                return dir;
-            else
-                dir = DOWN;
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
         }
         else if (dir == DOWN)
         {
             if (map[gate->y + 1][gate->x] == EMPTY)
-<<<<<<< HEAD
                 return;
             else
                 Setdir(LEFT);
         }
     }
-=======
-                return dir;
-            else
-                dir = LEFT;
-        }
-    }
-    return dir;
->>>>>>> 0ce4952782dc20996afa563c9806ca53ad2d0f53
 }
