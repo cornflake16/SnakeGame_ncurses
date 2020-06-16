@@ -266,7 +266,9 @@ void Stage::resume()
 
 void Stage::move(int **map)
 {
-  map[Bam->y][Bam->x] = EMPTY;
+  if(map[Bam->y][Bam->x] != WALL){
+    map[Bam->y][Bam->x] = EMPTY;
+  }
   Something *q = Bam;
   Something *p = q->link;
   while (p->link != NULL)
@@ -357,7 +359,9 @@ void Stage::eatItem(int item, int dir, int **map)
             p->y--;
         p->link = Bam;
         Bam = p;
-        map[Bam->y][Bam->x] = Bam->who;
+        if(map[Bam->y][Bam->x] != WALL){
+          map[Bam->y][Bam->x] = Bam->who;
+        }
         stat[0]++;
         stat[1]++;
     }
@@ -390,54 +394,87 @@ void Stage::enterGate(Something *head, int **map)
 {
     if (gate1->x == head->x && gate1->y == head->y)
     { // 중간벽에 게이트가 있을시
-        findRoot(gate2,map);
-        if (dir == LEFT)
-        {
-            head->x = gate2->x - 1;
-            head->y = gate2->y;
-        }
-        else if (dir == UP)
-        {
-            head->x = gate2->x;
-            head->y = gate2->y - 1;
-        }
-        else if (dir == RIGHT)
-        {
-            head->x = gate2->x + 1;
-            head->y = gate2->y;
-        }
-        else if (dir == DOWN)
-        {
-            head->x = gate2->x;
-            head->y = gate2->y + 1;
-        }
+      if(gate2->x == 0){
+        head->x = 1; head->y = gate2->y;
+        dir = RIGHT;
+      }
+      else if(gate2->x == 49){
+        head->x = 48; head->y = gate2->y;
+        dir = LEFT;
+      }
+      else if(gate2->y == 0){
+        head->x = gate2->x; head->y = 1;
+        dir = DOWN;
+      }
+      else if(gate2->y == 24){
+        head->x = gate2->x; head->y = 23;
+        dir = UP;
+      }
+      findRoot(gate2,map);
+      if (dir == LEFT)
+      {
+          head->x = gate2->x - 1;
+          head->y = gate2->y;
+      }
+      else if (dir == UP)
+      {
+          head->x = gate2->x;
+          head->y = gate2->y - 1;
+      }
+      else if (dir == RIGHT)
+      {
+          head->x = gate2->x + 1;
+          head->y = gate2->y;
+      }
+      else if (dir == DOWN)
+      {
+          head->x = gate2->x;
+          head->y = gate2->y + 1;
+      }
     }
     else if (gate2->x == head->x && gate2->y == head->y)
     {
-          // 중간벽에 게이트가 있을시
-          findRoot(gate1,map);
-          if (dir == LEFT)
-          {
-              head->x = gate1->x - 1;
-              head->y = gate1->y;
-          }
-          else if (dir == UP)
-          {
-              head->x = gate1->x;
-              head->y = gate1->y - 1;
-          }
-          else if (dir == RIGHT)
-          {
-              head->x = gate1->x + 1;
-              head->y = gate1->y;
-          }
-          else if (dir == DOWN)
-          {
-              head->x = gate1->x;
-              head->y = gate1->y + 1;
-          }
-    }
-    stat[3]++;
+      if(gate1->x == 0){
+        head->x = 1; head->y = gate1->y;
+        dir = RIGHT;
+
+      }
+      else if(gate1->x == 49){
+        head->x = 48; head->y = gate1->y;
+        dir = LEFT;
+      }
+      else if(gate1->y == 0){
+        head->x = gate1->x; head->y = 1;
+        dir = DOWN;
+      }
+      else if(gate1->y == 24){
+        head->x = gate1->x; head->y = 23;
+        dir = UP;
+      }
+      // 중간벽에 게이트가 있을시
+      findRoot(gate1,map);
+      if (dir == LEFT)
+      {
+          head->x = gate1->x - 1;
+          head->y = gate1->y;
+      }
+      else if (dir == UP)
+      {
+          head->x = gate1->x;
+          head->y = gate1->y - 1;
+      }
+      else if (dir == RIGHT)
+      {
+          head->x = gate1->x + 1;
+          head->y = gate1->y;
+      }
+      else if (dir == DOWN)
+      {
+          head->x = gate1->x;
+          head->y = gate1->y + 1;
+      }
+  }
+  stat[3]++;
 }
 
 void Stage::findRoot(Something *gate, int **map)
@@ -446,7 +483,7 @@ void Stage::findRoot(Something *gate, int **map)
     {
         if (dir == LEFT)
         {
-            if (map[gate->y][gate->x - 1] == EMPTY)
+            if (map[gate->y][gate->x - 1] == EMPTY && gate->y >=0)
                 return;
             else
                 Setdir(UP);
