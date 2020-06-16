@@ -3,6 +3,7 @@
 #include <ncurses.h>
 #include <iostream>
 #include <cmath>
+#include <cstring>
 #include <cstdlib>
 #include <random>
 #include <unistd.h>
