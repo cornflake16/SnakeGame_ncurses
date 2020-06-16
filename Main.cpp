@@ -60,7 +60,6 @@ int main()
         };
     }
 
-end:
     endwin();
     return 0;
 }
