@@ -3,15 +3,16 @@
 #include <ncurses.h>
 #include <iostream>
 #include <cmath>
-#include <ctime>
 #include <cstdlib>
+#include <random>
+#include <unistd.h>
 #include "Something.h"
 
 //방향키 인덱스 정의
-#define UP 8
-#define DOWN 2
-#define RIGHT 6
-#define LEFT 4
+#define UP KEY_UP
+#define DOWN KEY_DOWN
+#define RIGHT KEY_RIGHT
+#define LEFT KEY_LEFT
 
 //항목별 인덱스 정의
 #define EMPTY 0
@@ -28,16 +29,23 @@ using namespace std;
 class Stage
 {
 public:
-    WINDOW *win;
+    int ***stage;
+
+    // window variables
     WINDOW *game;
     WINDOW *score;
     WINDOW *mission;
 
-    int ***stage;
+    // mission variables
+    int stat[4];
+    int statMission[4];
 
-    Something* Bam;
-    Something* gate1;
-    Something* gate2;
+    // mission check variables
+    char chkMission[4];
+
+    Something *Bam;
+    Something *gate1;
+    Something *gate2;
 
     Stage();
     ~Stage();
@@ -46,40 +54,44 @@ public:
     int getMapCol() const { return MAP_COL; }
     int getNlines() const { return NLINES; }
     int getNcols() const { return NCOLS; }
-    void setMap(int***& stage);
-    int** copyMap(int nStage);
-    void drawMap(int** map);
-    void drawBorders();
-
-    void makeSnake(int **map);
+    void setMap(int ***&stage);
+    int **copyMap(int nStage);
+    void drawMap(int **map);
 
     void setMission();
-    void drawMission();
     void pause();
     void resume();
 
-    void EatItem(int item,int dir,int**map);
+    void eatItem(int item, int dir, int **map);
+    void makeSnake(int **map);
+    void move(int **map);
 
-    void Move(int direction,int** map);
-    void appearItem(int**& map);
+    void appearItem(int **&map);
+    void appearGate(int **&map);
+    void enterGate(Something *head, int **map);
 
-    void appearGate(int**& map);
-    void Gate(Something* head,int** map, int dir);
-    void isMissionClear();
+    pair<int, int> numOfItems(int **map);
+    bool isMissionClear();
 
-    int checkBody(){return Body;}
-    bool checkfinish(){return finish;}
+    bool checkfinish() { return finish; }
     void Gameover();
+    void alert(int color, int bkgdColor, const string msg);
 
-    int findRoot(Something* gate,int dir,int** map);
+    void findRoot(Something *gate,int **map);
+    void Setdir(int direction) {dir = direction;}
+    int Getdir() { return dir;}
 
 private:
     const int STAGE_NUM = 4; //스테이지 개수
-    const int MAP_ROW = 25,
-              MAP_COL = 50; //맵 세로, 가로 길이
     const int NLINES = 40,
               NCOLS = 110;
-    int Body;
+    const int MAP_ROW = 25,
+              MAP_COL = 50;
+    const int ROW_END = MAP_ROW - 1,
+              COL_END = MAP_COL - 1;
+    const string itemIndex = " ^X@=+-%";
+
     bool finish;
+    int dir;
 };
 #endif
