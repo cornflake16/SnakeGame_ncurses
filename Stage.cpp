@@ -165,7 +165,7 @@ void Stage::setMission()
     statMission[0] = rand() % 5 + 6; // 뱀 길이: 5~10
     statMission[1] = rand() % 5 + 4; // 증가 아이템 획득 횟수: 4~8
     statMission[2] = rand() % 4 + 3; // 감소 아이템 획득 횟수: 3~6
-    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1 ~ 5
+    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1~5
 }
 
 bool Stage::isMissionClear()
@@ -188,6 +188,19 @@ bool Stage::isMissionClear()
     }
     if (count == 4)
         return TRUE;
+    return FALSE;
+}
+
+bool Stage::isGateExists(int **&map)
+{
+    for(int i=0; i<MAP_ROW; i++)
+    {
+        for(int j=0; j<MAP_COL; j++)
+        {
+            if(map[i][j] == GATE)
+                return TRUE;
+        }
+    }
     return FALSE;
 }
 
@@ -215,6 +228,8 @@ void Stage::appearItem(int **&map)
 
 void Stage::appearGate(int **&map)
 {
+    if(isGateExists(map))
+        return;
     int n, y, x;
     for (int i = 0; i < 2; i++)
     {
@@ -249,6 +264,20 @@ void Stage::appearGate(int **&map)
             gate1 = new Something(y, x, GATE);
         if (i == 1)
             gate2 = new Something(y, x, GATE);
+    }
+}
+
+void Stage::disappearGateOrItem(int **&map)
+{
+    for(int i=0; i<MAP_ROW; i++)
+    {
+        for(int j=0; j<MAP_COL; j++)
+        {
+            if(map[i][j] == GATE)
+                map[i][j] = WALL; 
+            else if(map[i][j] == GROWTH_ITEM || map[i][j] == POISON_ITEM)
+                map[i][j] = EMPTY;
+        }
     }
 }
 
