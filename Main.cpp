@@ -12,14 +12,18 @@ int main()
         mvprintw(3, 23, "[ Stage %d / %d ]", i + 1, view.getStageNum());
         map = view.copyMap(i);
         view.setMission();
-        view.appearGate(map);
         view.makeSnake(map);
         pair<int, int> nItems = view.numOfItems(map);
         while (1)
         {
+            view.appearGate(map);
             if (!(++t % 10) && (nItems.first + nItems.second) < 4)
                 view.appearItem(map);
             view.drawMap(map);
+            if(!(t%100))
+            {
+                view.disappearGateOrItem(map);
+            }
             switch (key = getch())
             {
             case LEFT:
