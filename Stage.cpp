@@ -21,7 +21,7 @@ Stage::Stage()
         printw("Your terminal cannot change the color definitions\n");
         printw("press any key to continue...\n");
         getch();
-        move(0);
+        moveSnake();
     }
     init_pair(EMPTY, COLOR_WHITE, COLOR_BLACK);          //0(빈칸):  하양, 검정
     init_pair(WALL, COLOR_BLACK, COLOR_WHITE);           //1(벽): 검정, 하양
@@ -32,19 +32,13 @@ Stage::Stage()
     init_pair(POISON_ITEM, COLOR_RED, COLOR_MAGENTA);    //6(- 아이템) 빨강, 분홍
     init_pair(GATE, COLOR_CYAN, COLOR_CYAN);             //8(목표+캐릭터):  형광, 형광
 }
+
 Stage::~Stage()
 {
     delwin(mission);
     delwin(score);
     delwin(game);
-    int i, j;
-    for (i = 0; i < STAGE_NUM; i++)
-    {
-        for (j = 0; j < MAP_ROW; j++)
-            delete[] stage[i][j];
-        delete[] stage[i];
-    }
-    delete[] stage;
+    endwin();
 }
 
 void Stage::setMap(int ***&stage)
@@ -76,32 +70,27 @@ void Stage::setMap(int ***&stage)
         stage[i][0][COL_END] = IMMUNE_WALL;
         stage[i][ROW_END][0] = IMMUNE_WALL;
         stage[i][ROW_END][COL_END] = IMMUNE_WALL;
-        if (i == 0 || i == 2) // 1단계, 3단계에서 중간벽 설정
+        if(i)
         {
             for (int z = 0; z < 20; z++)
-            {
                 stage[i][MAP_ROW / 2 - 3][MAP_COL / 3 + z] = WALL;
-            }
         }
     }
 }
 
-int **Stage::copyMap(int nStage)
+void Stage::copyMap(int nStage)
 {
-    int **m = new int *[MAP_ROW];
+    map = new int *[MAP_ROW];
     for (int i = 0; i < MAP_COL; i++)
-        m[i] = new int[MAP_COL];
+        map[i] = new int[MAP_COL];
     for (int i = 0; i < MAP_ROW; i++)
     {
         for (int j = 0; j < MAP_COL; j++)
-        {
-            m[i][j] = stage[nStage][i][j];
-        }
+            map[i][j] = stage[nStage][i][j];
     }
-    return m;
 }
 
-void Stage::drawMap(int **map)
+void Stage::drawMap()
 {
     game = newwin(MAP_ROW, MAP_COL, 5, 6);
     for (int i = 0; i < MAP_ROW; i++)
@@ -138,26 +127,9 @@ void Stage::drawMap(int **map)
     wrefresh(mission);
 }
 
-pair<int, int> Stage::numOfItems(int **map)
-{
-    int nGrowth = 0, nPoison = 0;
-    for (int i = 0; i < MAP_ROW; i++)
-    {
-        for (int j = 0; j < MAP_COL; j++)
-        {
-            if (map[i][j] == GROWTH_ITEM)
-                nGrowth++;
-            else if (map[i][j] == POISON_ITEM)
-                nPoison++;
-        }
-    }
-    pair<int, int> pii = make_pair(nGrowth, nPoison);
-    return pii;
-}
-
 void Stage::setMission()
 {
-    finish = FALSE;
+    finish = chkEnter = FALSE;
     dir = LEFT;
     memset(stat, 0, sizeof(stat));
     memset(statMission, 0, sizeof(statMission));
@@ -165,7 +137,7 @@ void Stage::setMission()
     statMission[0] = rand() % 5 + 6; // 뱀 길이: 5~10
     statMission[1] = rand() % 5 + 4; // 증가 아이템 획득 횟수: 4~8
     statMission[2] = rand() % 4 + 3; // 감소 아이템 획득 횟수: 3~6
-    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1~5
+    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1 ~ 5
 }
 
 bool Stage::isMissionClear()
@@ -191,45 +163,30 @@ bool Stage::isMissionClear()
     return FALSE;
 }
 
-bool Stage::isGateExists(int **&map)
+void Stage::appearItem()
 {
-    for(int i=0; i<MAP_ROW; i++)
+    int appearNum = rand() % 3 + 1;
+    for (int i = 0; i < appearNum; i++)
     {
-        for(int j=0; j<MAP_COL; j++)
-        {
-            if(map[i][j] == GATE)
-                return TRUE;
-        }
-    }
-    return FALSE;
-}
-
-void Stage::appearItem(int **&map)
-{
-    pair<int, int> nItems = numOfItems(map);
-    int row, col;
-    for (int i = 0; i < 3 - (nItems.first + nItems.second); i++)
-    {
-        int itemType;
-        if (nItems.first > nItems.second)
-            itemType = POISON_ITEM;
-        else
+        int itemType = rand() % 2 + GROWTH_ITEM;
+        if (stat[0] <= 3)
             itemType = GROWTH_ITEM;
         while (1)
         {
-            row = rand() % MAP_ROW;
-            col = rand() % MAP_COL;
-            if (map[row][col] == EMPTY)
+            int y = rand() % (MAP_ROW - 2) + 1;
+            int x = rand() % (MAP_COL - 2) + 1;
+            if (map[y][x] == EMPTY)
+            {
+                map[y][x] = itemType;
+                itemPos.push_back(make_pair(y, x));
                 break;
+            }
         }
-        map[row][col] = itemType;
     }
 }
 
-void Stage::appearGate(int **&map)
+void Stage::appearGate()
 {
-    if(isGateExists(map))
-        return;
     int n, y, x;
     for (int i = 0; i < 2; i++)
     {
@@ -257,9 +214,12 @@ void Stage::appearGate(int **&map)
                 x = MAP_COL / 3 + (rand() % 20);
             }
             if (map[y][x] == WALL)
+            {
+                map[y][x] = GATE;
+                gatePos.push_back(make_pair(y, x));
                 break;
+            }
         }
-        map[y][x] = GATE;
         if (i == 0)
             gate1 = new Something(y, x, GATE);
         if (i == 1)
@@ -267,29 +227,37 @@ void Stage::appearGate(int **&map)
     }
 }
 
-void Stage::disappearGateOrItem(int **&map)
+void Stage::disappearItem()
 {
-    for(int i=0; i<MAP_ROW; i++)
-    {
-        for(int j=0; j<MAP_COL; j++)
-        {
-            if(map[i][j] == GATE)
-                map[i][j] = WALL; 
-            else if(map[i][j] == GROWTH_ITEM || map[i][j] == POISON_ITEM)
-                map[i][j] = EMPTY;
-        }
-    }
+    for (auto item : itemPos)
+        map[item.first][item.second] = EMPTY;
 }
 
-void Stage::pause()
+void Stage::disappearGate()
 {
+    for (auto gate : gatePos)
+        map[gate.first][gate.second] = WALL;
 }
 
-void Stage::resume()
+void Stage::makeSnake()
 {
+    stat[0] = 3;
+    string itemIndex = " ^X@=+-%";
+    int row = 13;
+    int col = 26;
+    Bam = new Something(row, col--, SNAKE_BODY);
+    Something *p = new Something(row, col--, SNAKE_BODY);
+    Bam->link = p;
+    p = new Something(row, col--, SNAKE_HEAD);
+    Bam->link->link = p;
+    map[Bam->y][Bam->x] = Bam->who;
+    p = Bam->link;
+    map[p->y][p->x] = p->who;
+    p = p->link;
+    map[p->y][p->x] = p->who;
 }
 
-void Stage::move(int **map)
+void Stage::moveSnake()
 {
     map[Bam->y][Bam->x] = EMPTY;
     Something *q = Bam;
@@ -331,7 +299,7 @@ void Stage::move(int **map)
     }
     if (map[p->y][p->x] == GROWTH_ITEM || map[p->y][p->x] == POISON_ITEM)
     {
-        eatItem(map[p->y][p->x], map);
+        eatItem(map[p->y][p->x]);
     }
     if (map[p->y][p->x] == WALL || map[p->y][p->x] == SNAKE_BODY)
     {
@@ -340,37 +308,17 @@ void Stage::move(int **map)
     }
     if (map[p->y][p->x] == GATE)
     {
-        enterGate(p, map);
+        enterGate(p);
     }
     map[p->y][p->x] = p->who;
 }
 
-void Stage::makeSnake(int **map)
-{
-    stat[0] = 3;
-    string itemIndex = " ^X@=+-%";
-    int row = 13;
-    int col = 26;
-    Bam = new Something(row, col--, SNAKE_BODY);
-    Something *p = new Something(row, col--, SNAKE_BODY);
-    Bam->link = p;
-    p = new Something(row, col--, SNAKE_HEAD);
-    Bam->link->link = p;
-    map[Bam->y][Bam->x] = Bam->who;
-    p = Bam->link;
-    map[p->y][p->x] = p->who;
-    p = p->link;
-    map[p->y][p->x] = p->who;
-}
-
-void Stage::eatItem(int item, int **map)
+void Stage::eatItem(int item)
 {
     if (item == GROWTH_ITEM)
     {
         if (stat[0] == 10)
-        {
             return;
-        }
         Something *p = new Something(Bam->y, Bam->x, SNAKE_BODY);
         if (Bam->x - Bam->link->x == 1)
             p->x++;
@@ -411,10 +359,11 @@ void Stage::alert(int color, int bkgdColor, const string msg)
     usleep(1750000);
 }
 
-void Stage::enterGate(Something *head, int **map)
+void Stage::enterGate(Something *head)
 {
+    chkEnter = TRUE;
     if (gate1->x == head->x && gate1->y == head->y)
-    { 
+    {
         if (gate2->x == 0)
         {
             head->x = 1;
@@ -440,7 +389,7 @@ void Stage::enterGate(Something *head, int **map)
             dir = UP;
         }
         // 중간벽에 게이트가 있을시
-        findRoot(gate2, map);
+        findRoot(gate2);
         if (dir == LEFT)
         {
             head->x = gate2->x - 1;
@@ -489,7 +438,7 @@ void Stage::enterGate(Something *head, int **map)
             dir = UP;
         }
         // 중간벽에 게이트가 있을시
-        findRoot(gate1, map);
+        findRoot(gate1);
         if (dir == LEFT)
         {
             head->x = gate1->x - 1;
@@ -514,7 +463,7 @@ void Stage::enterGate(Something *head, int **map)
     stat[3]++;
 }
 
-int Stage::findRoot(Something *gate, int **map)
+int Stage::findRoot(Something *gate)
 {
     for (int i = 0; i < 4; i++)
     {
