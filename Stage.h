@@ -7,6 +7,7 @@
 #include <cstdlib>
 #include <random>
 #include <unistd.h>
+#include <vector>
 #include "Something.h"
 
 //방향키 인덱스 정의
@@ -32,7 +33,12 @@ class Stage
 {
 public:
     int ***stage;
+    int **map;
     int dir;
+    int gate1x, gate1y, gate2x, gate2y;
+    bool chkEnter;
+
+    vector<pair<int, int>> itemPos, gatePos;
 
     // window variables
     WINDOW *game;
@@ -58,31 +64,26 @@ public:
     int getMapRow() const { return MAP_ROW; }
     int getMapCol() const { return MAP_COL; }
     void setMap(int ***&stage);
-    int **copyMap(int nStage);
-    void drawMap(int **map);
+    void copyMap(int nStage);
+    void drawMap();
+
+    void makeSnake();
+    void moveSnake();
+    void eatItem(int item);
+    int findRoot(Something *gate);
+
+    void appearItem();
+    void appearGate();
+    void disappearItem();
+    void disappearGate();
+    void enterGate(Something *head);
 
     void setMission();
-    void pause();
-    void resume();
-
-    void eatItem(int item, int **map);
-    void makeSnake(int **map);
-    void move(int **map);
-
-    bool isGateExists(int **&map);
-    void appearItem(int **&map);
-    void appearGate(int **&map);
-    void disappearGateOrItem(int **&map);
-    void enterGate(Something *head, int **map);
-
-    pair<int, int> numOfItems(int **map);
     bool isMissionClear();
 
     bool checkGameOver() { return finish; }
     void Gameover();
     void alert(int color, int bkgdColor, const string msg);
-
-    int findRoot(Something *gate, int **map);
 
 private:
     const int STAGE_NUM = 4; //스테이지 개수
