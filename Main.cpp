@@ -1,29 +1,36 @@
 #include "Stage.h"
-int **map;
-int key, t;
-
+int key, t, n;
 int main()
 {
     Stage view = Stage();
     view.setMap(view.stage);
     for (int i = 0; i < view.getStageNum(); i++)
     {
-        t = 0;
+        t = n = 0;
         mvprintw(3, 23, "[ Stage %d / %d ]", i + 1, view.getStageNum());
-        map = view.copyMap(i);
+        view.copyMap(i);
         view.setMission();
-        view.makeSnake(map);
-        pair<int, int> nItems = view.numOfItems(map);
+        view.makeSnake();
+        view.appearGate();
         while (1)
         {
-            view.appearGate(map);
-            if (!(++t % 10) && (nItems.first + nItems.second) < 4)
-                view.appearItem(map);
-            view.drawMap(map);
-            if(!(t%100))
-            {
-                view.disappearGateOrItem(map);
+            view.moveSnake();
+            if(view.chkEnter)   // 게이트에 진입 후, 꼬리 부분까지 진출 성공 시, 문 재생성
+            {   
+                if(++n >= view.stat[0])
+                {
+                    view.disappearGate();
+                    view.appearGate();
+                    n = 0;
+                    view.chkEnter = FALSE;
+                }
             }
+            if(++t%50 == 0) // 5초마다 아이템 재생성 (쓰레드 구현이 아니므로, 미세한 오차가 존재)
+            {
+                view.disappearItem();
+                view.appearItem();
+            }
+            view.drawMap();
             switch (key = getch())
             {
             case LEFT:
@@ -46,8 +53,7 @@ int main()
                 endwin();
                 return 0;
             }
-            view.move(map);
-            if (view.stat[0] < 3)
+            if (view.stat[0] < 3) 
                 view.Gameover();
             if (view.isMissionClear())
             {
@@ -60,10 +66,9 @@ int main()
                 endwin();
                 return 0;
             }
-            timeout(100);
+            timeout(100);   // 0.1s 딜레이
         };
     }
-
     endwin();
     return 0;
 }
