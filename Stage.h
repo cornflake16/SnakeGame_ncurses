@@ -69,8 +69,10 @@ public:
     void makeSnake(int **map);
     void move(int **map);
 
+    bool isGateExists(int **&map);
     void appearItem(int **&map);
     void appearGate(int **&map);
+    void disappearGateOrItem(int **&map);
     void enterGate(Something *head, int **map);
 
     pair<int, int> numOfItems(int **map);
