@@ -70,7 +70,7 @@ void Stage::setMap(int ***&stage)
         stage[i][0][COL_END] = IMMUNE_WALL;
         stage[i][ROW_END][0] = IMMUNE_WALL;
         stage[i][ROW_END][COL_END] = IMMUNE_WALL;
-        if(i)
+        if (i)
         {
             for (int z = 0; z < 20; z++)
                 stage[i][MAP_ROW / 2 - 3][MAP_COL / 3 + z] = WALL;
@@ -231,12 +231,14 @@ void Stage::disappearItem()
 {
     for (auto item : itemPos)
         map[item.first][item.second] = EMPTY;
+    itemPos.clear();
 }
 
 void Stage::disappearGate()
 {
     for (auto gate : gatePos)
         map[gate.first][gate.second] = WALL;
+    gatePos.clear();
 }
 
 void Stage::makeSnake()
