@@ -1,7 +1,6 @@
 #include "Stage.h"
 Stage::Stage()
 {
-    level = 0;
     srand((unsigned)time(0));
     initscr();
     resize_term(NLINES, NCOLS);
@@ -30,12 +29,15 @@ Stage::Stage()
     init_pair(SNAKE_HEAD, COLOR_YELLOW, COLOR_BLACK);    //3(뱀 머리): 노랑, 검정
     init_pair(SNAKE_BODY, COLOR_CYAN, COLOR_BLUE);       //4(뱀 몸): 형광, 파랑
     init_pair(GROWTH_ITEM, COLOR_YELLOW, COLOR_RED);     //5(+ 아이템): 노랑, 빨강
-    init_pair(POISON_ITEM, COLOR_RED, COLOR_MAGENTA);    //6(- 아이템) 빨강, 분홍
+    init_pair(POISON_ITEM, COLOR_YELLOW, COLOR_MAGENTA); //6(- 아이템) 노랑, 분홍
     init_pair(GATE, COLOR_CYAN, COLOR_CYAN);             //8(목표+캐릭터):  형광, 형광
+
+    level = 0;
 }
 
 Stage::~Stage()
 {
+    delwin(info);
     delwin(mission);
     delwin(score);
     delwin(game);
@@ -103,19 +105,19 @@ void Stage::setMap()
             {
                 if (z > 10 && z < 14)
                     continue;
-                if(stage[i][z][MAP_COL - 15] == WALL)
-                  stage[i][z][MAP_COL - 15] = IMMUNE_WALL;
+                if (stage[i][z][MAP_COL - 15] == WALL)
+                    stage[i][z][MAP_COL - 15] = IMMUNE_WALL;
                 else
-                  stage[i][z][MAP_COL - 15] = WALL;
+                    stage[i][z][MAP_COL - 15] = WALL;
             }
             for (int z = 5; z < 20; z++)
             {
                 if (z > 10 && z < 14)
                     continue;
-                if(stage[i][z][15] == WALL)
-                  stage[i][z][15] = IMMUNE_WALL;
+                if (stage[i][z][15] == WALL)
+                    stage[i][z][15] = IMMUNE_WALL;
                 else
-                  stage[i][z][15] = WALL;
+                    stage[i][z][15] = WALL;
             }
         }
     }
@@ -123,7 +125,6 @@ void Stage::setMap()
 
 void Stage::copyMap(int nStage)
 {
-    level++;
     map = new int *[MAP_ROW];
     for (int i = 0; i < MAP_COL; i++)
         map[i] = new int[MAP_COL];
@@ -136,7 +137,7 @@ void Stage::copyMap(int nStage)
 
 void Stage::drawMap()
 {
-    game = newwin(MAP_ROW, MAP_COL, 5, 6);
+    game = newwin(MAP_ROW, MAP_COL, 6, 6);
     for (int i = 0; i < MAP_ROW; i++)
     {
         for (int j = 0; j < MAP_COL; j++)
@@ -149,7 +150,7 @@ void Stage::drawMap()
         printw("\n");
     }
 
-    score = newwin(16, 30, 1, 64);
+    score = newwin(16, 30, 2, 64);
     box(score, 0, 0);
     mvwprintw(score, 0, 10, "[ SCORE ]");
     mvwprintw(score, 3, 5, "B: %d / 10", stat[0]);
@@ -157,7 +158,7 @@ void Stage::drawMap()
     mvwprintw(score, 9, 5, "-: %d", stat[2]);
     mvwprintw(score, 12, 5, "G: %d", stat[3]);
 
-    mission = newwin(16, 30, 18, 64);
+    mission = newwin(16, 30, 19, 64);
     box(mission, 0, 0);
     mvwprintw(mission, 0, 9, "[ MISSION ]");
     mvwprintw(mission, 3, 5, "B: %d ( %c )", statMission[0], chkMission[0]);
@@ -165,16 +166,23 @@ void Stage::drawMap()
     mvwprintw(mission, 9, 5, "-: %d ( %c )", statMission[2], chkMission[2]);
     mvwprintw(mission, 12, 5, "G: %d ( %c )", statMission[3], chkMission[3]);
 
+    ++nTime;
+    info = newwin(4, 15, 2, 24);
+    mvwprintw(info, 0, 1, "[ STAGE %d/%d ]", level + 1, STAGE_NUM);
+    mvwprintw(info, 2, 3, "< %02d:%02d >", nTime / 600, nTime / 10 % 60);
+
     refresh();
     wrefresh(game);
     wrefresh(score);
     wrefresh(mission);
+    wrefresh(info);
 }
 
 void Stage::setMission()
 {
-    finish = chkEnter = FALSE;
+    nTime = 0;
     dir = LEFT;
+    finish = chkEnter = FALSE;
     memset(stat, 0, sizeof(stat));
     memset(statMission, 0, sizeof(statMission));
     memset(chkMission, ' ', sizeof(chkMission));
@@ -210,6 +218,8 @@ void Stage::appearItem()
         int itemType = rand() % 2 + GROWTH_ITEM;
         if (stat[0] <= 3 || chkMission[2] == 'v')
             itemType = GROWTH_ITEM;
+        else if (stat[0] == 10 || chkMission[1] == 'v')
+            itemType = POISON_ITEM;
         while (1)
         {
             int y = rand() % (MAP_ROW - 2) + 1;
@@ -231,7 +241,7 @@ void Stage::appearGate()
     {
         while (1)
         {
-            n = rand() % (level ? 4 : 5);
+            n = rand() % (!level ? 4 : 5);
             y = rand() % (MAP_ROW - 2) + 1;
             x = rand() % (MAP_COL - 2) + 1;
             switch (n)
@@ -274,7 +284,10 @@ void Stage::appearGate()
 void Stage::disappearItem()
 {
     for (auto item : itemPos)
-        map[item.first][item.second] = EMPTY;
+    {
+        if (map[item.first][item.second] == GROWTH_ITEM || map[item.first][item.second] == POISON_ITEM)
+            map[item.first][item.second] = EMPTY;
+    }
     itemPos.clear();
 }
 
@@ -288,7 +301,6 @@ void Stage::disappearGate()
 void Stage::makeSnake()
 {
     stat[0] = 3;
-    string itemIndex = " ^X@=+-%";
     int row = 13;
     int col = 26;
     Bam = new Something(row, col--, SNAKE_BODY);
@@ -305,9 +317,8 @@ void Stage::makeSnake()
 
 void Stage::moveSnake()
 {
-    if(map[Bam->y][Bam->x] != WALL)
-      map[Bam->y][Bam->x] = EMPTY;
-
+    if (map[Bam->y][Bam->x] != WALL)
+        map[Bam->y][Bam->x] = EMPTY;
     Something *q = Bam;
     Something *p = q->link;
     while (p->link != NULL)
@@ -396,16 +407,16 @@ void Stage::Gameover()
     finish = true;
 }
 
-void Stage::alert(int color, int bkgdColor, const string msg)
+void Stage::alert(int posY, int posX, const string msg, bool stopFlag)
 {
-    WINDOW *alert = newwin(7, msg.length()*2, 13, 20);
+    WINDOW *alert = newwin(7, msg.length() * 2, posY, posX);
     box(alert, 0, 0);
-    wattron(alert, COLOR_PAIR(color));
-    wbkgd(alert, COLOR_PAIR(bkgdColor));
-    mvwprintw(alert, 3, msg.length()/2, msg.c_str());
+    wattron(alert, COLOR_PAIR(0));
+    wbkgd(alert, COLOR_PAIR(2));
+    mvwprintw(alert, 3, msg.length() / 2, msg.c_str());
     wrefresh(alert);
-    usleep(1750000);
-    clear();
+    if (!stopFlag)
+        usleep(1750000);
 }
 
 void Stage::enterGate(Something *head)
