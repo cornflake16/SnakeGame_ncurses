@@ -4,13 +4,12 @@ int key, t, n;
 int main()
 {
     Stage view = Stage();
-    view.setMap(view.stage);
+    view.setMap();
     for (int i = 0; i < view.getStageNum(); i++)
     {
         t = n = 0;
         mvprintw(3, 23, "[ Stage %d / %d ]", i + 1, view.getStageNum());
         view.copyMap(i);
-        view.levelup();
         view.setMission();
         view.makeSnake();
         view.appearGate();
@@ -36,11 +35,9 @@ int main()
                     view.dir = DOWN;
                 break;
             case PAUSE:
-              view.alert(0, 2, "Press anykey to restart");
-              while(1){
-                if(getch()) break;
-              }
-              break;
+                view.alert(0, 2, "Press anykey to restart");
+                getch();
+                break;
             case ESC:
                 endwin();
                 return 0;
@@ -48,7 +45,7 @@ int main()
             view.moveSnake();
             if (view.chkEnter) // 게이트에 진입 후, 꼬리 부분까지 진출 성공 시, 문 재생성
             {
-                if (++n >= view.stat[0])
+                if (++n > view.stat[0])
                 {
                     view.disappearGate();
                     view.appearGate();
@@ -62,9 +59,7 @@ int main()
                 view.appearItem();
             }
             if (view.stat[0] < 3) // 뱀의 길이가 3미만일 경우, 게임 오버
-            {
                 view.Gameover();
-            }
             if (view.isMissionClear())
             {
                 view.alert(0, 2, "Stage Clear!");
