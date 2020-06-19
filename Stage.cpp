@@ -103,13 +103,19 @@ void Stage::setMap()
             {
                 if (z > 10 && z < 14)
                     continue;
-                stage[i][z][MAP_COL - 15] = WALL;
+                if(stage[i][z][MAP_COL - 15] == WALL)
+                  stage[i][z][MAP_COL - 15] = IMMUNE_WALL;
+                else
+                  stage[i][z][MAP_COL - 15] = WALL;
             }
             for (int z = 5; z < 20; z++)
             {
                 if (z > 10 && z < 14)
                     continue;
-                stage[i][z][15] = WALL;
+                if(stage[i][z][15] == WALL)
+                  stage[i][z][15] = IMMUNE_WALL;
+                else
+                  stage[i][z][15] = WALL;
             }
         }
     }
@@ -299,7 +305,9 @@ void Stage::makeSnake()
 
 void Stage::moveSnake()
 {
-    map[Bam->y][Bam->x] = EMPTY;
+    if(map[Bam->y][Bam->x] != WALL)
+      map[Bam->y][Bam->x] = EMPTY;
+
     Something *q = Bam;
     Something *p = q->link;
     while (p->link != NULL)
@@ -337,10 +345,6 @@ void Stage::moveSnake()
         q->y = p->y;
         p->y++;
     }
-    if (map[p->y][p->x] == GROWTH_ITEM || map[p->y][p->x] == POISON_ITEM)
-    {
-        eatItem(map[p->y][p->x]);
-    }
     if (map[p->y][p->x] == WALL || map[p->y][p->x] == SNAKE_BODY)
     {
         map[p->y][p->x] = IMMUNE_WALL;
@@ -349,6 +353,10 @@ void Stage::moveSnake()
     if (map[p->y][p->x] == GATE)
     {
         enterGate(p);
+    }
+    if (map[p->y][p->x] == GROWTH_ITEM || map[p->y][p->x] == POISON_ITEM)
+    {
+        eatItem(map[p->y][p->x]);
     }
     map[p->y][p->x] = p->who;
 }
