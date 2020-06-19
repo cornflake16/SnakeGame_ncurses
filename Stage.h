@@ -17,6 +17,7 @@
 #define LEFT KEY_LEFT
 #define ESC 27
 
+#
 //항목별 인덱스 정의
 #define EMPTY 0
 #define WALL 1
