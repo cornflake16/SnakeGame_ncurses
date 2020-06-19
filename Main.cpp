@@ -35,6 +35,12 @@ int main()
                 if (view.dir != UP)
                     view.dir = DOWN;
                 break;
+            case PAUSE:
+              view.alert(0, 2, "Press anykey to restart");
+              while(1){
+                if(getch()) break;
+              }
+              break;
             case ESC:
                 endwin();
                 return 0;
