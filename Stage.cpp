@@ -42,7 +42,7 @@ Stage::~Stage()
     endwin();
 }
 
-void Stage::setMap(int ***&stage)
+void Stage::setMap()
 {
     int i, j, k;
     stage = new int **[STAGE_NUM];
@@ -85,23 +85,31 @@ void Stage::setMap(int ***&stage)
             for (int z = 5; z < 20; z++)
                 stage[i][z][15] = WALL;
         }
-        if(i == 3)
+        if (i == 3)
         {
-          for (int z = 10; z < 40; z++){
-              if(z > 22 && z < 27) continue;
-              stage[i][7][z] = WALL;
+            for (int z = 10; z < 40; z++)
+            {
+                if (z > 22 && z < 27)
+                    continue;
+                stage[i][7][z] = WALL;
             }
-          for (int z = 10; z < 40; z++){
-              if(z > 22 && z < 27) continue;
-              stage[i][MAP_ROW - 7][z] = WALL;
+            for (int z = 10; z < 40; z++)
+            {
+                if (z > 22 && z < 27)
+                    continue;
+                stage[i][MAP_ROW - 7][z] = WALL;
             }
-          for (int z = 5; z < 20; z++){
-              if(z > 10  && z < 14) continue;
-              stage[i][z][MAP_COL - 15] = WALL;
+            for (int z = 5; z < 20; z++)
+            {
+                if (z > 10 && z < 14)
+                    continue;
+                stage[i][z][MAP_COL - 15] = WALL;
             }
-          for (int z = 5; z < 20; z++){
-              if(z > 10  && z < 14) continue;
-              stage[i][z][15] = WALL;
+            for (int z = 5; z < 20; z++)
+            {
+                if (z > 10 && z < 14)
+                    continue;
+                stage[i][z][15] = WALL;
             }
         }
     }
@@ -109,6 +117,7 @@ void Stage::setMap(int ***&stage)
 
 void Stage::copyMap(int nStage)
 {
+    level++;
     map = new int *[MAP_ROW];
     for (int i = 0; i < MAP_COL; i++)
         map[i] = new int[MAP_COL];
@@ -163,29 +172,24 @@ void Stage::setMission()
     memset(stat, 0, sizeof(stat));
     memset(statMission, 0, sizeof(statMission));
     memset(chkMission, ' ', sizeof(chkMission));
-    statMission[0] = rand() % 5 + 6; // 뱀 길이: 5~10
+    statMission[0] = rand() % 5 + 6; // 뱀 길이: 6~10
     statMission[1] = rand() % 5 + 4; // 증가 아이템 획득 횟수: 4~8
     statMission[2] = rand() % 4 + 3; // 감소 아이템 획득 횟수: 3~6
-    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1 ~ 5
+    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1~5
 }
 
 bool Stage::isMissionClear()
 {
     int count = 0;
-    if (stat[0] >= statMission[0])
-        chkMission[0] = 'v';
-    else
-        chkMission[0] = ' ';
-    if (stat[1] >= statMission[1])
-        chkMission[1] = 'v';
-    if (stat[2] >= statMission[2])
-        chkMission[2] = 'v';
-    if (stat[3] >= statMission[3])
-        chkMission[3] = 'v';
     for (int i = 0; i < 4; i++)
     {
-        if (chkMission[i] == 'v')
+        if (stat[i] >= statMission[i])
+        {
+            chkMission[i] = 'v';
             count++;
+        }
+        else if (!i)
+            chkMission[i] = ' ';
     }
     if (count == 4)
         return TRUE;
@@ -198,10 +202,7 @@ void Stage::appearItem()
     for (int i = 0; i < appearNum; i++)
     {
         int itemType = rand() % 2 + GROWTH_ITEM;
-        if(chkMission[2] == 'v'){
-          itemType = GROWTH_ITEM;
-        }
-        if (stat[0] <= 3)
+        if (stat[0] <= 3 || chkMission[2] == 'v')
             itemType = GROWTH_ITEM;
         while (1)
         {
@@ -224,12 +225,9 @@ void Stage::appearGate()
     {
         while (1)
         {
-            n = rand() % 5;
-            y = rand() % MAP_ROW;
-            x = rand() % MAP_COL;
-            if(level < 2){
-              n = rand() % 4;
-            }
+            n = rand() % (level ? 4 : 5);
+            y = rand() % (MAP_ROW - 2) + 1;
+            x = rand() % (MAP_COL - 2) + 1;
             switch (n)
             {
             case 0: // 상단 벽
@@ -245,12 +243,13 @@ void Stage::appearGate()
                 y = ROW_END;
                 break;
             case 4: // 중간
-                while(1){
-                  x = rand() % 30 + 10;
-                  y = rand() % 15 + 5;
-                  if(map[y][x] == WALL) break;
+                while (1)
+                {
+                    x = rand() % 30 + 10;
+                    y = rand() % 15 + 5;
+                    if (map[y][x] == WALL)
+                        break;
                 }
-                break;
             }
             if (map[y][x] == WALL)
             {
@@ -391,13 +390,14 @@ void Stage::Gameover()
 
 void Stage::alert(int color, int bkgdColor, const string msg)
 {
-    WINDOW *alert = newwin(7, 24, 13, 20);
+    WINDOW *alert = newwin(7, msg.length()*2, 13, 20);
     box(alert, 0, 0);
     wattron(alert, COLOR_PAIR(color));
     wbkgd(alert, COLOR_PAIR(bkgdColor));
-    mvwprintw(alert, 3, 7, msg.c_str());
+    mvwprintw(alert, 3, msg.length()/2, msg.c_str());
     wrefresh(alert);
     usleep(1750000);
+    clear();
 }
 
 void Stage::enterGate(Something *head)
