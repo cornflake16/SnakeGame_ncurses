@@ -8,7 +8,6 @@ int main()
     for (int i = 0; i < view.getStageNum(); i++)
     {
         t = n = 0;
-        mvprintw(3, 23, "[ Stage %d / %d ]", i + 1, view.getStageNum());
         view.copyMap(i);
         view.setMission();
         view.makeSnake();
@@ -35,8 +34,12 @@ int main()
                     view.dir = DOWN;
                 break;
             case PAUSE:
-                view.alert(0, 2, "Press anykey to restart");
-                getch();
+                view.alert(13, 13, "Press 'r' to play!", TRUE);
+                while (1)
+                {
+                    if (getch() == RESUME)
+                        break;
+                }
                 break;
             case ESC:
                 endwin();
@@ -45,7 +48,7 @@ int main()
             view.moveSnake();
             if (view.chkEnter) // 게이트에 진입 후, 꼬리 부분까지 진출 성공 시, 문 재생성
             {
-                if (++n > view.stat[0])
+                if (++n >= view.stat[0])
                 {
                     view.disappearGate();
                     view.appearGate();
@@ -62,18 +65,20 @@ int main()
                 view.Gameover();
             if (view.isMissionClear())
             {
-                view.alert(0, 2, "Stage Clear!");
+                view.alert(13, 19, "Stage Clear!", FALSE);
                 break;
             }
             if (view.checkGameOver())
             {
-                view.alert(0, 2, "Game Over!");
+                view.alert(13, 21, "Game Over!", FALSE);
                 endwin();
                 return 0;
             }
             view.drawMap();
             timeout(100); // 0.1s 딜레이
+
         }
+        view.levelUp();
     }
     endwin();
     return 0;
