@@ -85,6 +85,7 @@ public:
     void Gameover();
     void alert(int color, int bkgdColor, const string msg);
 
+    void levelup() {level++;}
 private:
     const int STAGE_NUM = 4; //스테이지 개수
     const int NLINES = 40,
@@ -96,5 +97,6 @@ private:
     const string itemIndex = " ^X@=+-%";
 
     bool finish;
+    int level;
 };
 #endif
