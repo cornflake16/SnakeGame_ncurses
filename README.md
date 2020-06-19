@@ -1,5 +1,5 @@
 # SnakeGame_ncurses
-<img width="699" alt="스크린샷 2020-06-16 오전 12 34 12" src="https://user-images.githubusercontent.com/2377324/84677072-2aa36680-af69-11ea-81bc-61cec12a238d.png">
+<img width="699" alt="스크린샷 2020-06-20 오전 4 16 34" src="https://user-images.githubusercontent.com/2377324/85173245-b68cf980-b2ad-11ea-80df-3144df1d668a.png">
 
 ----------------
 2020-06-13(토): 맵 출력, 문 생성, 아이템 생성 완료
