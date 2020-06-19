@@ -10,6 +10,7 @@ int main()
         t = n = 0;
         mvprintw(3, 23, "[ Stage %d / %d ]", i + 1, view.getStageNum());
         view.copyMap(i);
+        view.levelup();
         view.setMission();
         view.makeSnake();
         view.appearGate();
