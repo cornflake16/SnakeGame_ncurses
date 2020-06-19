@@ -17,6 +17,7 @@
 #define LEFT KEY_LEFT
 #define ESC 27
 #define PAUSE 112
+#define RESUME 114
 
 //항목별 인덱스 정의
 #define EMPTY 0
@@ -44,6 +45,7 @@ public:
     WINDOW *game;
     WINDOW *score;
     WINDOW *mission;
+    WINDOW *info;
 
     // mission variables
     int stat[4];
@@ -66,7 +68,7 @@ public:
     void setMap();
     void copyMap(int nStage);
     void drawMap();
-    void levelUp() {level++;}
+    void levelUp() { level++; }
 
     void makeSnake();
     void moveSnake();
@@ -84,7 +86,7 @@ public:
 
     bool checkGameOver() { return finish; }
     void Gameover();
-    void alert(int color, int bkgdColor, const string msg);
+    void alert(int posY, int posX, const string msg, bool stopFlag);
 
 private:
     const int STAGE_NUM = 4; //스테이지 개수
@@ -94,9 +96,9 @@ private:
               MAP_COL = 50;
     const int ROW_END = MAP_ROW - 1,
               COL_END = MAP_COL - 1;
-    const string itemIndex = " ^X@=+-%";
+    const string itemIndex = "  X0=+-%";
 
     bool finish;
-    int level;
+    int level, nTime;
 };
 #endif
