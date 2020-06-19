@@ -1,6 +1,7 @@
 #include "Stage.h"
 Stage::Stage()
 {
+    level = 0;
     srand((unsigned)time(0));
     initscr();
     resize_term(NLINES, NCOLS);
@@ -70,10 +71,38 @@ void Stage::setMap(int ***&stage)
         stage[i][0][COL_END] = IMMUNE_WALL;
         stage[i][ROW_END][0] = IMMUNE_WALL;
         stage[i][ROW_END][COL_END] = IMMUNE_WALL;
-        if (i)
+        if (i == 1)
         {
-            for (int z = 0; z < 20; z++)
-                stage[i][MAP_ROW / 2 - 3][MAP_COL / 3 + z] = WALL;
+            for (int z = 10; z < 40; z++)
+                stage[i][7][z] = WALL;
+            for (int z = 10; z < 40; z++)
+                stage[i][MAP_ROW - 7][z] = WALL;
+        }
+        if (i == 2)
+        {
+            for (int z = 5; z < 20; z++)
+                stage[i][z][MAP_COL - 15] = WALL;
+            for (int z = 5; z < 20; z++)
+                stage[i][z][15] = WALL;
+        }
+        if(i == 3)
+        {
+          for (int z = 10; z < 40; z++){
+              if(z > 22 && z < 27) continue;
+              stage[i][7][z] = WALL;
+            }
+          for (int z = 10; z < 40; z++){
+              if(z > 22 && z < 27) continue;
+              stage[i][MAP_ROW - 7][z] = WALL;
+            }
+          for (int z = 5; z < 20; z++){
+              if(z > 10  && z < 14) continue;
+              stage[i][z][MAP_COL - 15] = WALL;
+            }
+          for (int z = 5; z < 20; z++){
+              if(z > 10  && z < 14) continue;
+              stage[i][z][15] = WALL;
+            }
         }
     }
 }
@@ -169,6 +198,9 @@ void Stage::appearItem()
     for (int i = 0; i < appearNum; i++)
     {
         int itemType = rand() % 2 + GROWTH_ITEM;
+        if(chkMission[2] == 'v'){
+          itemType = GROWTH_ITEM;
+        }
         if (stat[0] <= 3)
             itemType = GROWTH_ITEM;
         while (1)
@@ -195,6 +227,9 @@ void Stage::appearGate()
             n = rand() % 5;
             y = rand() % MAP_ROW;
             x = rand() % MAP_COL;
+            if(level < 2){
+              n = rand() % 4;
+            }
             switch (n)
             {
             case 0: // 상단 벽
@@ -210,8 +245,12 @@ void Stage::appearGate()
                 y = ROW_END;
                 break;
             case 4: // 중간
-                y = MAP_ROW / 2 - 3;
-                x = MAP_COL / 3 + (rand() % 20);
+                while(1){
+                  x = rand() % 30 + 10;
+                  y = rand() % 15 + 5;
+                  if(map[y][x] == WALL) break;
+                }
+                break;
             }
             if (map[y][x] == WALL)
             {
