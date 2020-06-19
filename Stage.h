@@ -16,8 +16,8 @@
 #define RIGHT KEY_RIGHT
 #define LEFT KEY_LEFT
 #define ESC 27
-
 #define PAUSE 112
+
 //항목별 인덱스 정의
 #define EMPTY 0
 #define WALL 1
@@ -36,7 +36,6 @@ public:
     int ***stage;
     int **map;
     int dir;
-    int gate1x, gate1y, gate2x, gate2y;
     bool chkEnter;
 
     vector<pair<int, int>> itemPos, gatePos;
@@ -64,9 +63,10 @@ public:
     int getNcols() const { return NCOLS; }
     int getMapRow() const { return MAP_ROW; }
     int getMapCol() const { return MAP_COL; }
-    void setMap(int ***&stage);
+    void setMap();
     void copyMap(int nStage);
     void drawMap();
+    void levelUp() {level++;}
 
     void makeSnake();
     void moveSnake();
@@ -86,7 +86,6 @@ public:
     void Gameover();
     void alert(int color, int bkgdColor, const string msg);
 
-    void levelup() {level++;}
 private:
     const int STAGE_NUM = 4; //스테이지 개수
     const int NLINES = 40,
