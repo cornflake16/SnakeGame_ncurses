@@ -1,4 +1,4 @@
-class Something{
+struct Something{
 int x;
 int y; // 10을 곱함
 int who;
