@@ -389,7 +389,10 @@ void Stage::eatItem(int item)
             p->y--;
         p->link = Bam;
         Bam = p;
-        map[Bam->y][Bam->x] = Bam->who;
+        if(map[Bam->y][Bam->x] != WALL)
+        {
+            map[Bam->y][Bam->x] = Bam->who;
+        }
         stat[0]++;
         stat[1]++;
     }
