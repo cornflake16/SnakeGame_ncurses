@@ -126,7 +126,7 @@ private:
               msDiv[5] = {2, 4, 5, 10, 20};
 
     // variables about manual & option 
-    string title, menuTitle, shorTitle;
+    string manualTitle, menuTitle, shorTitle;
     string menuTxt[4], shorTxt[7];
     int sizeY, sizeX,
         startY, startX;
@@ -134,7 +134,6 @@ private:
         desStartY, desStartX;
     int txtLines, hidTxtLen, scrollBarLen;
 
-    string manualTitle;
     vector<string> manualTxt;
 
     vector<pair<int, int>> itemPos, gatePos;
