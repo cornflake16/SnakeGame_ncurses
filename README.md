@@ -1,4 +1,4 @@
-# SnakeGame_ncurses
+<p align="center"> # SnakeGame_ncurses </p>
 <p align="center">[ Game Summary ]</p>
 
 <p align="center">
