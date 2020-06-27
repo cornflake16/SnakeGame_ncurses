@@ -39,8 +39,9 @@ Stage::Stage()
     init_pair(12, COLOR_RED, COLOR_BLACK);               //12(OPTION)
 
     menuLastFocus = 0,
-    speed = 8,
+    speed = 4,
     optLastFocus = speed - 1,
+    tcount = 0;
     title = "< MANUAL >",
     menuTitle = "< MENU >",
     menuTxt[0] = " - PLAY: Start the game",
@@ -140,11 +141,11 @@ void Stage::play()
 {
     screenLock();
     setMap();
-    int t, n;
-    int timeoutMs = 500 - (speed * 50);
+    int n;
+    timeoutMs = speedMs[speed - 1];
     for (int i = 0; i < STAGE_NUM; i++)
     {
-        t = n = 0;
+        msTime = n = 0;
         dir = LEFT;
         copyMap(i);
         setMission();
@@ -194,7 +195,7 @@ void Stage::play()
                     chkEnter = FALSE;
                 }
             }
-            if (++t % 50 == 0) // Item regeneration every 5 seconds
+            if (++msTime % (msDiv[speed - 1] * 5) == 0) // Item regeneration every 5 seconds
             {
                 disappearItem();
                 appearItem();
@@ -212,7 +213,7 @@ void Stage::play()
                 return;
             }
             drawMap();
-            timeout(timeoutMs); // 0.1s delay
+            timeout(timeoutMs);
         }
         level++;
     }
@@ -282,40 +283,39 @@ void Stage::option()
 {
     clear();
     screenLock();
-    string txt[10];
-    txt[0] = "[ OPTION ]";
+    string optTitle = "[ OPTION ]";
+    string txt[5];
     string optTxt[2];
     optTxt[0] = "SPEED:";
-    optTxt[1] = " SLOW <-----> FAST ";
+    optTxt[1] = " SLOW <--> FAST ";
     int focus = optLastFocus;
     level = 0;
     while (1)
     {
         if (!focus)
-            focus = 300;
-        for (int i = 1; i < sizeof(txt) / sizeof(txt[0]); i++)
-        {
-            txt[i] = to_string(i);
-        }
+            focus = 500;
+        for (int i = 0; i < sizeof(txt) / sizeof(txt[0]); i++)
+            txt[i] = to_string(i + 1);
+
         attron(COLOR_PAIR(10));
-        mvprintw(y / 2 - 2, x / 2 - txt[0].length() / 2, txt[0].c_str());
+        mvprintw(y / 2 - 2, x / 2 - optTitle.length() / 2, optTitle.c_str());
         attroff(COLOR_PAIR(10));
-        for (int i = 1; i < sizeof(txt) / sizeof(txt[0]); i++)
+        for (int i = 0; i < sizeof(txt) / sizeof(txt[0]); i++)
         {
-            if (i == abs(focus % 9 + 1))
+            if (i == abs(focus % 5))
             {
                 attron(COLOR_PAIR(12));
-                mvprintw(y / 2, x / 2 - sizeof(txt) / sizeof(txt[0]) + i * 2, txt[i].c_str());
+                mvprintw(y / 2, x / 2 - sizeof(txt) / sizeof(txt[0]) + i * 3 - 1, txt[i].c_str());
                 attroff(COLOR_PAIR(12));
             }
             else
-                mvprintw(y / 2, x / 2 - sizeof(txt) / sizeof(txt[0]) + i * 2, txt[i].c_str());
+                mvprintw(y / 2, x / 2 - sizeof(txt) / sizeof(txt[0]) + i * 3 - 1, txt[i].c_str());
         }
 
-        mvprintw(y / 2 + 1, x / 2 - optTxt[1].length() / 2, optTxt[1].c_str());
+        mvprintw(y / 2 + 2, x / 2 - optTxt[1].length() / 2 + 1, optTxt[1].c_str());
 
         optLastFocus = focus;
-        speed = atoi(txt[abs(focus % 9 + 1)].c_str());
+        speed = atoi(txt[abs(focus % 5)].c_str());
         switch (getch())
         {
         case LEFT:
@@ -442,7 +442,7 @@ void Stage::drawMap()
     box(score, 0, 0);
     mvwprintw(score, 0, 10, "[ SCORE ]");
     wattroff(score, COLOR_PAIR(10));
-    mvwprintw(score, 3, 5, "B: %d / 10", stat[0]);
+    mvwprintw(score, 3, 5, "B: %d / %d", stat[0], SNAKE_MAX_LENGTH);
     mvwprintw(score, 6, 5, "+: %d", stat[1]);
     mvwprintw(score, 9, 5, "-: %d", stat[2]);
     mvwprintw(score, 12, 5, "G: %d", stat[3]);
@@ -457,49 +457,15 @@ void Stage::drawMap()
     mvwprintw(mission, 9, 5, "-: %d ( %c )", statMission[2], chkMission[2]);
     mvwprintw(mission, 12, 5, "G: %d ( %c )", statMission[3], chkMission[3]);
 
-    ++nTime;
     info = newwin(4, 15, y / 2 - (MAP_ROW / 2 + 4), x / 2 + MAP_COL / 2 - 47.4);
     mvwprintw(info, 0, 1, "[ STAGE %d/%d ]", level + 1, STAGE_NUM);
-    mvwprintw(info, 2, 3, "< %02d:%02d >", nTime / 600, nTime / 10 % 60);
+    mvwprintw(info, 2, 3, "< %02d:%02d >", msTime / (msDiv[speed - 1] * 60), (msTime / msDiv[speed - 1]) % 60);
 
     refresh();
+    wrefresh(info);
     wrefresh(game);
     wrefresh(score);
     wrefresh(mission);
-    wrefresh(info);
-}
-
-void Stage::setMission()
-{
-    nTime = 0;
-    finish = chkEnter = FALSE;
-    memset(stat, 0, sizeof(stat));
-    memset(statMission, 0, sizeof(statMission));
-    memset(chkMission, ' ', sizeof(chkMission));
-
-    // SET MISSION RANDOM NUMBER THAT EACH ITEMS(ITEM: range).
-    statMission[0] = rand() % 5 + 6; // SNAKE LENGTH: 6~10
-    statMission[1] = rand() % 5 + 4; // INCREASE ITEM: 4~8
-    statMission[2] = rand() % 4 + 3; // DECREASE ITEM: 3~6
-    statMission[3] = rand() % 5 + 1; // GATE : 1~5
-}
-
-bool Stage::isMissionClear()
-{
-    int count = 0;
-    for (int i = 0; i < 4; i++)
-    {
-        if (stat[i] >= statMission[i])
-        {
-            chkMission[i] = 'v';
-            count++;
-        }
-        else if (!i)
-            chkMission[i] = ' ';
-    }
-    if (count == 4)
-        return TRUE;
-    return FALSE;
 }
 
 void Stage::appearItem()
@@ -508,9 +474,9 @@ void Stage::appearItem()
     for (int i = 0; i < appearNum; i++)
     {
         int itemType = rand() % 2 + GROWTH_ITEM;
-        if (stat[0] <= 3 || chkMission[2] == 'v')
+        if (chkMission[2] == 'v')
             itemType = GROWTH_ITEM;
-        else if (stat[0] == 10 || chkMission[1] == 'v')
+        else if (stat[0] >= SNAKE_MAX_LENGTH)
             itemType = POISON_ITEM;
         while (1)
         {
@@ -536,8 +502,8 @@ void Stage::appearGate()
         while (1)
         {
             n = rand() % (!level ? 4 : 5);
-            y = rand() % (MAP_ROW - 2) + 1;
-            x = rand() % (MAP_COL - 2) + 1;
+            y = rand() % (MAP_ROW - (i?3:2)) + (i?2:1);
+            x = rand() % (MAP_COL - (i?3:2)) + (i?2:1);
             switch (n)
             {
             case 0: // upper side
@@ -664,54 +630,6 @@ void Stage::moveSnake()
         eatItem(map[p->y][p->x]);
     }
     map[p->y][p->x] = p->who;
-}
-
-void Stage::eatItem(int item)
-{
-    if (item == GROWTH_ITEM)
-    {
-        if (stat[0] == 10)
-            return;
-        Something *p = new Something(Bam->y, Bam->x, SNAKE_BODY);
-        if (Bam->x - Bam->link->x == 1)
-            p->x++;
-        else if (Bam->y - Bam->link->y == 1)
-            p->y++;
-        else if (Bam->x - Bam->link->x == -1)
-            p->x--;
-        else if (Bam->y - Bam->link->y == -1)
-            p->y--;
-        p->link = Bam;
-        Bam = p;
-        if (map[Bam->y][Bam->x] != WALL)
-            map[Bam->y][Bam->x] = Bam->who;
-        stat[0]++;
-        stat[1]++;
-    }
-    else if (item == POISON_ITEM)
-    {
-        map[Bam->y][Bam->x] = EMPTY;
-        Bam = Bam->link;
-        stat[0]--;
-        stat[2]++;
-    }
-}
-
-void Stage::gameOver()
-{
-    finish = true;
-}
-
-void Stage::alert(int posY, int posX, const string msg, bool stopFlag)
-{
-    WINDOW *alert = newwin(7, msg.length() * 2, posY, posX);
-    box(alert, 0, 0);
-    wattron(alert, COLOR_PAIR(0));
-    wbkgd(alert, COLOR_PAIR(2));
-    mvwprintw(alert, 3, msg.length() / 2, msg.c_str());
-    wrefresh(alert);
-    if (!stopFlag)
-        usleep(1750000);
 }
 
 void Stage::enterGate(Something *head)
@@ -850,4 +768,84 @@ int Stage::findRoot(Something *gate)
         }
     }
     return dir;
+}
+
+void Stage::eatItem(int item)
+{
+    if (item == GROWTH_ITEM)
+    {
+        if (stat[0] == 10)
+            return;
+        Something *p = new Something(Bam->y, Bam->x, SNAKE_BODY);
+        if (Bam->x - Bam->link->x == 1)
+            p->x++;
+        else if (Bam->y - Bam->link->y == 1)
+            p->y++;
+        else if (Bam->x - Bam->link->x == -1)
+            p->x--;
+        else if (Bam->y - Bam->link->y == -1)
+            p->y--;
+        p->link = Bam;
+        Bam = p;
+        if (map[Bam->y][Bam->x] != WALL)
+            map[Bam->y][Bam->x] = Bam->who;
+        stat[0]++;
+        stat[1]++;
+    }
+    else if (item == POISON_ITEM)
+    {
+        map[Bam->y][Bam->x] = EMPTY;
+        Bam = Bam->link;
+        stat[0]--;
+        stat[2]++;
+    }
+}
+
+void Stage::setMission()
+{
+    finish = chkEnter = FALSE;
+    memset(stat, 0, sizeof(stat));
+    memset(statMission, 0, sizeof(statMission));
+    memset(chkMission, ' ', sizeof(chkMission));
+
+    // SET MISSION RANDOM NUMBER THAT EACH ITEMS(ITEM: range).
+    statMission[0] = rand() % 5 + 6; // SNAKE LENGTH: 6~10
+    statMission[1] = rand() % 5 + 4; // INCREASE ITEM: 4~8
+    statMission[2] = rand() % 4 + 3; // DECREASE ITEM: 3~6
+    statMission[3] = rand() % 5 + 1; // GATE : 1~5
+}
+
+bool Stage::isMissionClear()
+{
+    int count = 0;
+    for (int i = 0; i < 4; i++)
+    {
+        if (stat[i] >= statMission[i])
+        {
+            chkMission[i] = 'v';
+            count++;
+        }
+        else if (!i)
+            chkMission[i] = ' ';
+    }
+    if (count == 4)
+        return TRUE;
+    return FALSE;
+}
+
+void Stage::gameOver()
+{
+    finish = true;
+}
+
+void Stage::alert(int posY, int posX, const string msg, bool stopFlag)
+{
+    WINDOW *alert = newwin(7, msg.length() * 2, posY, posX);
+    box(alert, 0, 0);
+    wattron(alert, COLOR_PAIR(0));
+    wbkgd(alert, COLOR_PAIR(2));
+    mvwprintw(alert, 3, msg.length() / 2, msg.c_str());
+    wrefresh(alert);
+    if (!stopFlag)
+        usleep(1750000);
 }
