@@ -101,11 +101,12 @@ private:
     int statMission[4];
 
     // struct variables about Snake
+    const int SNAKE_MAX_LENGTH = 10;
     Something *Bam;
     Something *gate1;
     Something *gate2;
 
-    // const variables about map & snake index
+    // const variables about map size & snake character
     const int STAGE_NUM = 4,
               MAP_ROW = 25,
               MAP_COL = 50,
@@ -119,8 +120,10 @@ private:
     // variables about snake
     int dir, y, x,
         menuLastFocus, optLastFocus,
-        level, speed,
-        nTime;
+        level, speed, tcount,
+        timeoutMs, msTime;
+    const int speedMs[5] = {500, 250, 200, 100, 50},
+              msDiv[5] = {2, 4, 5, 10, 20};
 
     // variables about manual & option 
     string title, menuTitle, shorTitle;
