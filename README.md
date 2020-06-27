@@ -1,5 +1,5 @@
 # SnakeGame_ncurses
-\t[ MAIN SCREEN ]
+[ MAIN SCREEN ]
 
 <img width="600" alt="menu" src="https://user-images.githubusercontent.com/2377324/85913548-c473e900-b870-11ea-9d3e-0aee8434da33.png">
 
@@ -16,4 +16,4 @@
 <img width="600" alt="option" src="https://user-images.githubusercontent.com/2377324/85913553-c8a00680-b870-11ea-8bf9-09555e05bbd8.png">
 
 ----------------
-2020-06-28(일): 코드 공개 ver. 1.0
+2020-06-28(SUN): code published ver. 1.0
