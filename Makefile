@@ -6,7 +6,7 @@ run: Stage.o Main.o
 	$(CC) $(CCFLAGS) -o run Stage.o Main.o $(TYPE)
 
 clean:
-	rm -f *.o
+	rm -f *.o run
 
 %.o : %.cpp %.h
 	$(CC) $(CCFLAGS) -c $<
