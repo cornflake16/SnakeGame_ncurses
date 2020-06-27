@@ -1,47 +1,333 @@
 #include "Stage.h"
+/************************************************
+    @file Stage.cpp
+    @author 윤낙원(Nakwon Yun), 김현민(Hyunmin Kim) 
+    @version 1.0 06/26/2020
+************************************************/
 Stage::Stage()
 {
     srand((unsigned)time(0));
     initscr();
-    resize_term(NLINES, NCOLS);
     keypad(stdscr, TRUE);
-    curs_set(0);
     cbreak();
     noecho();
 
     start_color();
-    if (has_colors() == FALSE) //사용자의 터미널(커맨드)에서 색상을 지원하지 않는다면 종료
+    if (has_colors() == FALSE)
     {
         endwin();
         printf("Your terminal does not support color\n");
         exit(1);
     }
-    if (init_color(COLOR_BLUE, 0, 0, 300) == ERR) //터미널에서 색상이 정상적으로 바뀌는지 여부확인
+    if (init_color(COLOR_BLUE, 0, 0, 300) == ERR)
     {
         printw("Your terminal cannot change the color definitions\n");
         printw("press any key to continue...\n");
         getch();
         moveSnake();
     }
-    init_pair(EMPTY, COLOR_WHITE, COLOR_BLACK);          //0(빈칸):  하양, 검정
-    init_pair(WALL, COLOR_BLACK, COLOR_WHITE);           //1(벽): 검정, 하양
-    init_pair(IMMUNE_WALL, COLOR_MAGENTA, COLOR_YELLOW); //2(기둥): 분홍, 노랑
-    init_pair(SNAKE_HEAD, COLOR_YELLOW, COLOR_BLACK);    //3(뱀 머리): 노랑, 검정
-    init_pair(SNAKE_BODY, COLOR_CYAN, COLOR_BLUE);       //4(뱀 몸): 형광, 파랑
-    init_pair(GROWTH_ITEM, COLOR_YELLOW, COLOR_RED);     //5(+ 아이템): 노랑, 빨강
-    init_pair(POISON_ITEM, COLOR_YELLOW, COLOR_MAGENTA); //6(- 아이템) 노랑, 분홍
-    init_pair(GATE, COLOR_CYAN, COLOR_CYAN);             //8(목표+캐릭터):  형광, 형광
+    init_pair(EMPTY, COLOR_WHITE, COLOR_BLACK);          //0(EMPTY)
+    init_pair(WALL, COLOR_BLACK, COLOR_WHITE);           //1(WALL)
+    init_pair(IMMUNE_WALL, COLOR_BLACK, COLOR_WHITE);    //2(IMMUNE WALL)
+    init_pair(SNAKE_HEAD, COLOR_GREEN, COLOR_BLACK);     //3(SNAKE HEAD)
+    init_pair(SNAKE_BODY, COLOR_GREEN, COLOR_BLACK);     //4(SNAKE BODY)
+    init_pair(GROWTH_ITEM, COLOR_YELLOW, COLOR_RED);     //5(+ ITEM)
+    init_pair(POISON_ITEM, COLOR_YELLOW, COLOR_MAGENTA); //6(- ITEM)
+    init_pair(GATE, COLOR_CYAN, COLOR_CYAN);             //7(GATE)
+    init_pair(10, COLOR_GREEN, COLOR_BLACK);             //10(TITLE/SCROLL/BOARD)
+    init_pair(11, COLOR_BLACK, COLOR_WHITE);             //11(FOCUS)
+    init_pair(12, COLOR_RED, COLOR_BLACK);               //12(OPTION)
 
-    level = 0;
+    menuLastFocus = 0,
+    speed = 8,
+    optLastFocus = speed - 1,
+    title = "< MANUAL >",
+    menuTitle = "< MENU >",
+    menuTxt[0] = " - PLAY: Start the game",
+    menuTxt[1] = " - HELP: Manual of the game",
+    menuTxt[2] = " - OPTION: Setting of the game",
+    menuTxt[3] = " - EXIT: Exit the game";
+    shorTitle = "< SHORTCUTS >";
+    shorTxt[0] = " - Arrow up(^): MOVE UP",
+    shorTxt[1] = " - Arrow down(v): MOVE DOWN",
+    shorTxt[2] = " - Arrow left(<): MOVE LEFT",
+    shorTxt[3] = " - Arrow right(>): MOVE RIGHT",
+    shorTxt[4] = " - 'p': GAME PAUSE",
+    shorTxt[5] = " - 'r': GAME RESUME",
+    shorTxt[6] = " - 'esc': BACK TO THE MAIN MENU";
 }
 
 Stage::~Stage()
 {
+    delwin(scrollBar);
+    delwin(description);
+    delwin(manual);
     delwin(info);
     delwin(mission);
     delwin(score);
     delwin(game);
     endwin();
+}
+
+void Stage::screenLock()
+{
+    cout << "\e[3;240;120t";
+    cout << "\e[8;40;120t";
+    system("resize -s 40 120");
+    y = 40, x = 120;
+    mvprintw(y - 1, 0, "SnakeGame ver. 1.0");
+    sizeY = y / 1.5,
+    sizeX = x / 1.5,
+    startY = y / 2 - sizeY / 2,
+    startX = x / 2 - sizeX / 2,
+    desSizeY = sizeY - 6,
+    desSizeX = sizeX - 6,
+    desStartY = startY + 3,
+    desStartX = startX + 3,
+    txtLines = 26,
+    hidTxtLen = txtLines - desSizeY > 0 ? txtLines - desSizeY : 0,
+    scrollBarLen = desSizeY - hidTxtLen;
+}
+
+string Stage::menu()
+{
+    clear();
+    screenLock();
+    curs_set(0);
+    string txt[5];
+    txt[0] = "[ SNAKE GAME ]";
+    int focus = menuLastFocus;
+    level = 0;
+    while (1)
+    {
+        if (!focus)
+            focus = 300;
+        txt[1] = "PLAY";
+        txt[2] = "HELP";
+        txt[3] = "OPTION";
+        txt[4] = "EXIT";
+        attron(COLOR_PAIR(10));
+        mvprintw(y / 2 - 2, x / 2 - txt[0].length() / 2, txt[0].c_str());
+        attroff(COLOR_PAIR(10));
+        for (int i = 1; i <= sizeof(txt) / sizeof(txt[0]); i++)
+        {
+            if (i == abs(focus % 4 + 1))
+            {
+                attron(COLOR_PAIR(11));
+                mvprintw(y / 2 + i, x / 2 - (txt[i].length() / 2), txt[i].c_str());
+                attroff(COLOR_PAIR(11));
+            }
+            else
+                mvprintw(y / 2 + i, x / 2 - (txt[i].length() / 2), txt[i].c_str());
+        }
+        switch (getch())
+        {
+        case UP:
+            focus--;
+            break;
+        case DOWN:
+            focus++;
+            break;
+        case ENTER:
+            menuLastFocus = focus;
+            return txt[abs(focus % 4 + 1)];
+        }
+    }
+    return NULL;
+}
+
+void Stage::play()
+{
+    screenLock();
+    setMap();
+    int t, n;
+    int timeoutMs = 500 - (speed * 50);
+    for (int i = 0; i < STAGE_NUM; i++)
+    {
+        t = n = 0;
+        dir = LEFT;
+        copyMap(i);
+        setMission();
+        makeSnake();
+        appearGate();
+        drawMap();
+        while (1)
+        {
+            switch (getch())
+            {
+            case LEFT:
+                if (dir != RIGHT)
+                    dir = LEFT;
+                break;
+            case UP:
+                if (dir != DOWN)
+                    dir = UP;
+                break;
+            case RIGHT:
+                if (dir != LEFT)
+                    dir = RIGHT;
+                break;
+            case DOWN:
+                if (dir != UP)
+                    dir = DOWN;
+                break;
+            case PAUSE:
+                alert(y / 2 - 4, x / 2 - 34, "Press 'r' to play!", TRUE);
+                while (1)
+                {
+                    if (getch() == RESUME)
+                        break;
+                }
+                break;
+            case ESC:
+                endwin();
+                return;
+            }
+            moveSnake();
+            if (chkEnter) // After entering the Gate
+            {
+                if (++n >= stat[0]) // If tail successed that exit from the Gate, gate regeneration
+                {
+                    disappearGate();
+                    appearGate();
+                    n = 0;
+                    chkEnter = FALSE;
+                }
+            }
+            if (++t % 50 == 0) // Item regeneration every 5 seconds
+            {
+                disappearItem();
+                appearItem();
+            }
+            if (stat[0] < 3) // If the Snake length less than 3, game over
+                gameOver();
+            if (isMissionClear())
+            {
+                alert(y / 2 - 4, x / 2 - 27, "Stage Clear!", FALSE);
+                break;
+            }
+            if (checkGameOver())
+            {
+                alert(y / 2 - 4, x / 2 - 25, "Game Over!", FALSE);
+                return;
+            }
+            drawMap();
+            timeout(timeoutMs); // 0.1s delay
+        }
+        level++;
+    }
+    endwin();
+}
+
+void Stage::help()
+{
+    screenLock();
+    int ySize = 0, yScroll = 0;
+    while (1)
+    {
+        manual = newwin(sizeY, sizeX, startY, startX);
+        description = newwin(desSizeY, desSizeX, desStartY, desStartX);
+        scrollBar = newwin(scrollBarLen, 2, desStartY + yScroll, startX + sizeX - 6);
+        wattron(manual, COLOR_PAIR(10));
+        box(manual, 0, 0);
+        mvwprintw(manual, 0, sizeX / 2 - manualTitle.length() / 2, "%s", manualTitle.c_str());
+        wattroff(manual, COLOR_PAIR(10));
+
+        mvwprintw(description, 0 + ySize,
+                  sizeX / 2 - menuTitle.length() / 2 - 3, "%s", menuTitle.c_str());
+        for (int i = 0; i < sizeof(menuTxt) / sizeof(menuTxt[0]); i++)
+            mvwprintw(description, 2 + (i * 2) + ySize, sizeX / 2 - menuTxt[2].length() / 2 - 3, "%s", menuTxt[i].c_str());
+
+        mvwprintw(description, 11 + ySize,
+                  sizeX / 2 - shorTitle.length() / 2 - 3, "%s", shorTitle.c_str());
+        for (int i = 0; i < sizeof(shorTxt) / sizeof(shorTxt[0]); i++)
+            mvwprintw(description, 13 + (i * 2) + ySize, sizeX / 2 - shorTxt[6].length() / 2 - 3, "%s", shorTxt[i].c_str());
+
+        if (txtLines >= desSizeY)
+        {
+            wattron(scrollBar, COLOR_PAIR(10));
+            box(scrollBar, 0, 0);
+            wattroff(scrollBar, COLOR_PAIR(10));
+        }
+        refresh();
+        wrefresh(manual);
+        wrefresh(description);
+        wrefresh(scrollBar);
+    RE:
+        switch (getch())
+        {
+        case UP:
+            if (yScroll)
+                yScroll--;
+            else
+                goto RE;
+            if (ySize)
+                ySize++;
+            break;
+        case DOWN:
+            if (yScroll < desSizeY - scrollBarLen)
+                yScroll++;
+            else
+                goto RE;
+            if (ySize > desSizeY - txtLines && txtLines > desSizeY)
+                ySize--;
+            break;
+        case ESC:
+            return;
+        }
+    }
+}
+
+void Stage::option()
+{
+    clear();
+    screenLock();
+    string txt[10];
+    txt[0] = "[ OPTION ]";
+    string optTxt[2];
+    optTxt[0] = "SPEED:";
+    optTxt[1] = " SLOW <-----> FAST ";
+    int focus = optLastFocus;
+    level = 0;
+    while (1)
+    {
+        if (!focus)
+            focus = 300;
+        for (int i = 1; i < sizeof(txt) / sizeof(txt[0]); i++)
+        {
+            txt[i] = to_string(i);
+        }
+        attron(COLOR_PAIR(10));
+        mvprintw(y / 2 - 2, x / 2 - txt[0].length() / 2, txt[0].c_str());
+        attroff(COLOR_PAIR(10));
+        for (int i = 1; i < sizeof(txt) / sizeof(txt[0]); i++)
+        {
+            if (i == abs(focus % 9 + 1))
+            {
+                attron(COLOR_PAIR(12));
+                mvprintw(y / 2, x / 2 - sizeof(txt) / sizeof(txt[0]) + i * 2, txt[i].c_str());
+                attroff(COLOR_PAIR(12));
+            }
+            else
+                mvprintw(y / 2, x / 2 - sizeof(txt) / sizeof(txt[0]) + i * 2, txt[i].c_str());
+        }
+
+        mvprintw(y / 2 + 1, x / 2 - optTxt[1].length() / 2, optTxt[1].c_str());
+
+        optLastFocus = focus;
+        speed = atoi(txt[abs(focus % 9 + 1)].c_str());
+        switch (getch())
+        {
+        case LEFT:
+            focus--;
+            break;
+        case RIGHT:
+            focus++;
+            break;
+        case ESC:
+            return;
+        }
+    }
 }
 
 void Stage::setMap()
@@ -137,7 +423,8 @@ void Stage::copyMap(int nStage)
 
 void Stage::drawMap()
 {
-    game = newwin(MAP_ROW, MAP_COL, 6, 6);
+    game = newwin(MAP_ROW, MAP_COL,
+                  y / 2 - MAP_ROW / 2, x / 2 - (MAP_COL / 2 + 16));
     for (int i = 0; i < MAP_ROW; i++)
     {
         for (int j = 0; j < MAP_COL; j++)
@@ -150,24 +437,28 @@ void Stage::drawMap()
         printw("\n");
     }
 
-    score = newwin(16, 30, 2, 64);
+    score = newwin(16, 30, y / 2 - (MAP_ROW / 2 + 4), x / 2 + MAP_COL / 2 - 7.4);
+    wattron(score, COLOR_PAIR(10));
     box(score, 0, 0);
     mvwprintw(score, 0, 10, "[ SCORE ]");
+    wattroff(score, COLOR_PAIR(10));
     mvwprintw(score, 3, 5, "B: %d / 10", stat[0]);
     mvwprintw(score, 6, 5, "+: %d", stat[1]);
     mvwprintw(score, 9, 5, "-: %d", stat[2]);
     mvwprintw(score, 12, 5, "G: %d", stat[3]);
 
-    mission = newwin(16, 30, 19, 64);
+    mission = newwin(16, 30, y / 2 - (MAP_ROW / 2 + 4) + 17, x / 2 + MAP_COL / 2 - 7.4);
+    wattron(mission, COLOR_PAIR(10));
     box(mission, 0, 0);
     mvwprintw(mission, 0, 9, "[ MISSION ]");
+    wattroff(mission, COLOR_PAIR(10));
     mvwprintw(mission, 3, 5, "B: %d ( %c )", statMission[0], chkMission[0]);
     mvwprintw(mission, 6, 5, "+: %d ( %c )", statMission[1], chkMission[1]);
     mvwprintw(mission, 9, 5, "-: %d ( %c )", statMission[2], chkMission[2]);
     mvwprintw(mission, 12, 5, "G: %d ( %c )", statMission[3], chkMission[3]);
 
     ++nTime;
-    info = newwin(4, 15, 2, 24);
+    info = newwin(4, 15, y / 2 - (MAP_ROW / 2 + 4), x / 2 + MAP_COL / 2 - 47.4);
     mvwprintw(info, 0, 1, "[ STAGE %d/%d ]", level + 1, STAGE_NUM);
     mvwprintw(info, 2, 3, "< %02d:%02d >", nTime / 600, nTime / 10 % 60);
 
@@ -181,15 +472,16 @@ void Stage::drawMap()
 void Stage::setMission()
 {
     nTime = 0;
-    dir = LEFT;
     finish = chkEnter = FALSE;
     memset(stat, 0, sizeof(stat));
     memset(statMission, 0, sizeof(statMission));
     memset(chkMission, ' ', sizeof(chkMission));
-    statMission[0] = rand() % 5 + 6; // 뱀 길이: 6~10
-    statMission[1] = rand() % 5 + 4; // 증가 아이템 획득 횟수: 4~8
-    statMission[2] = rand() % 4 + 3; // 감소 아이템 획득 횟수: 3~6
-    statMission[3] = rand() % 5 + 1; // 게이트 진출 횟수: 1~5
+
+    // SET MISSION RANDOM NUMBER THAT EACH ITEMS(ITEM: range).
+    statMission[0] = rand() % 5 + 6; // SNAKE LENGTH: 6~10
+    statMission[1] = rand() % 5 + 4; // INCREASE ITEM: 4~8
+    statMission[2] = rand() % 4 + 3; // DECREASE ITEM: 3~6
+    statMission[3] = rand() % 5 + 1; // GATE : 1~5
 }
 
 bool Stage::isMissionClear()
@@ -224,7 +516,9 @@ void Stage::appearItem()
         {
             int y = rand() % (MAP_ROW - 2) + 1;
             int x = rand() % (MAP_COL - 2) + 1;
-            if (map[y][x] == EMPTY)
+            if (map[y][x] == EMPTY &&
+                map[y][x - 1] != GATE && map[y][x + 1] != GATE &&
+                map[y + 1][x] != GATE && map[y - 1][x] != GATE)
             {
                 map[y][x] = itemType;
                 itemPos.push_back(make_pair(y, x));
@@ -246,19 +540,19 @@ void Stage::appearGate()
             x = rand() % (MAP_COL - 2) + 1;
             switch (n)
             {
-            case 0: // 상단 벽
+            case 0: // upper side
                 y = 0;
                 break;
-            case 1: // 좌측
+            case 1: // left side
                 x = 0;
                 break;
-            case 2: // 우측
+            case 2: // right side
                 x = COL_END;
                 break;
-            case 3: // 하단
+            case 3: // lower side
                 y = ROW_END;
                 break;
-            case 4: // 중간
+            case 4: // middle
                 while (1)
                 {
                     x = rand() % 30 + 10;
@@ -359,7 +653,7 @@ void Stage::moveSnake()
     if (map[p->y][p->x] == WALL || map[p->y][p->x] == SNAKE_BODY)
     {
         map[p->y][p->x] = IMMUNE_WALL;
-        Gameover();
+        gameOver();
     }
     if (map[p->y][p->x] == GATE)
     {
@@ -389,10 +683,8 @@ void Stage::eatItem(int item)
             p->y--;
         p->link = Bam;
         Bam = p;
-        if(map[Bam->y][Bam->x] != WALL)
-        {
+        if (map[Bam->y][Bam->x] != WALL)
             map[Bam->y][Bam->x] = Bam->who;
-        }
         stat[0]++;
         stat[1]++;
     }
@@ -405,7 +697,7 @@ void Stage::eatItem(int item)
     }
 }
 
-void Stage::Gameover()
+void Stage::gameOver()
 {
     finish = true;
 }
@@ -451,8 +743,7 @@ void Stage::enterGate(Something *head)
             head->y = ROW_END - 1;
             dir = UP;
         }
-        // 중간벽에 게이트가 있을시
-        findRoot(gate2);
+        findRoot(gate2); // If gate on the middle wall, find the exit root.
         if (dir == LEFT)
         {
             head->x = gate2->x - 1;
@@ -500,8 +791,7 @@ void Stage::enterGate(Something *head)
             head->y = ROW_END - 1;
             dir = UP;
         }
-        // 중간벽에 게이트가 있을시
-        findRoot(gate1);
+        findRoot(gate1); // If gate on the middle wall, find the exit root.
         if (dir == LEFT)
         {
             head->x = gate1->x - 1;
