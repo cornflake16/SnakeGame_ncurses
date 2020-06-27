@@ -16,4 +16,5 @@
 
 ----------------
 Test Envrionment: macOS, ubuntu
+
 2020-06-28(SUN): code published ver. 1.0
