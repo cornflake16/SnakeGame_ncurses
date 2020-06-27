@@ -1,5 +1,5 @@
 # SnakeGame_ncurses
-[ 게임 화면 요약 ]
+[ GameScreen Summary ]
 
 <img width="850" alt="menu" src="https://user-images.githubusercontent.com/2377324/85927285-025c2600-b8e0-11ea-9e6b-b1093b56518c.png">
 
