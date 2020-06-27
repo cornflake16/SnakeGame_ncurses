@@ -1,4 +1,4 @@
-<p align="center"> # SnakeGame_ncurses </p>
+<h1 align="center"> # SnakeGame_ncurses </h1>
 <p align="center">[ Game Summary ]</p>
 
 <p align="center">
