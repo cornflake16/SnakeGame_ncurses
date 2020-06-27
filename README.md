@@ -1,5 +1,5 @@
 # SnakeGame_ncurses
-[ MAIN SCREEN ]
+[ MENU SCREEN ]
 
 <img width="600" alt="menu" src="https://user-images.githubusercontent.com/2377324/85913548-c473e900-b870-11ea-9d3e-0aee8434da33.png">
 
