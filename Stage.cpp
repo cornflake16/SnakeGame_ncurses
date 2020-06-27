@@ -42,7 +42,7 @@ Stage::Stage()
     speed = 4,
     optLastFocus = speed - 1,
     tcount = 0;
-    title = "< MANUAL >",
+    manualTitle = "< MANUAL >",
     menuTitle = "< MENU >",
     menuTxt[0] = " - PLAY: Start the game",
     menuTxt[1] = " - HELP: Manual of the game",
