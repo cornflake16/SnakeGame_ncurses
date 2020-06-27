@@ -1,5 +1,5 @@
 <h1 align="center"> SnakeGame_ncurses </h1>
-<p align="center">[ Game Summary ]</p>
+<p align="center">< Game Summary ></p>
 
 <p align="center"><img width="800" alt="menu" src="https://user-images.githubusercontent.com/2377324/85927285-025c2600-b8e0-11ea-9e6b-b1093b56518c.png"></p>
 <p align="center"><img width="800" alt="game" src="https://user-images.githubusercontent.com/2377324/85913549-c63dac80-b870-11ea-809d-56ffe4292bc0.png"></p>
