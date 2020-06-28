@@ -7,6 +7,6 @@
 <p align="center"><img width="800" alt="option" src="https://user-images.githubusercontent.com/2377324/85927290-0720da00-b8e0-11ea-9da2-ff6aa30df8d5.png"></p>
 
 ----------------
-Test Envrionment: macOS 10.15, ubuntu 18.04
+Test Environment: macOS 10.15, ubuntu 18.04
 
 2020-06-28(SUN): code published ver. 1.0
