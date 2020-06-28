@@ -1,7 +1,7 @@
 #include "Stage.h"
 /************************************************
     @file Stage.cpp
-    @author 윤낙원(Nakwon Yun), 김현민(Hyunmin Kim) 
+    @author 윤낙원(20163131), 김현민(20171609) 
     @version 1.0 06/26/2020
 ************************************************/
 Stage::Stage()
@@ -554,7 +554,10 @@ void Stage::disappearItem()
 void Stage::disappearGate()
 {
     for (auto gate : gatePos)
-        map[gate.first][gate.second] = WALL;
+    {
+        if(map[gate.first][gate.second] == GATE)
+            map[gate.first][gate.second] = WALL;
+    }
     gatePos.clear();
 }
 
