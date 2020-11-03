@@ -12,8 +12,15 @@ Test Environment: macOS 10.15, ubuntu 18.04
 2020-06-28(SUN): code published ver. 1.0
 
 < How to run >
-1. Download the file
-2. Unzip the (zip)file
-3. Open the terminal(or command)
-4. Move into the dir that launch file exists (> cd ./SnakeGame_ncurses_master)
-5. launch (run)file (> ./run)
+  1. Download the file
+  2. Unzip the (zip)file
+  3. Open the terminal(or command)
+  4. Move into the dir that launch file exists (> cd ./$dir)
+  5. launch (run)file (> ./run)
+
+< 실행 방법 >
+  1. 압축파일을 다운로드합니다.
+  2. 받은 압축파일을 해제합니다.
+  3. 터미널(혹은 커맨드)를 실행합니다.
+  4. 터미널 cd 명령어로 해제한 압축파일(폴더)로 이동합니다 (> cd ./$dir)
+  5. 게임을 실행합니다 (> ./run)
