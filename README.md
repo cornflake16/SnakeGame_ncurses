@@ -15,12 +15,12 @@ Test Environment: macOS 10.15, ubuntu 18.04
   1. Download the file
   2. Unzip the (zip)file
   3. Open the terminal(or command)
-  4. Move into the dir that launch file exists (> cd ./$dir)
+  4. Move into the dir that launch file exists using command(> cd ./$dir)
   5. launch (run)file (> ./run)
 
 < 실행 방법 >
   1. 압축파일을 다운로드합니다.
   2. 받은 압축파일을 해제합니다.
   3. 터미널(혹은 커맨드)를 실행합니다.
-  4. 터미널 cd 명령어로 해제한 압축파일(폴더)로 이동합니다 (> cd ./$dir)
+  4. 명령어를 사용하여 해제한 압축파일(폴더)로 이동합니다 (> cd ./$dir)
   5. 게임을 실행합니다 (> ./run)
