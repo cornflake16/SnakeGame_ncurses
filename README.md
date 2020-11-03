@@ -10,3 +10,10 @@
 Test Environment: macOS 10.15, ubuntu 18.04
 
 2020-06-28(SUN): code published ver. 1.0
+
+< How to run >
+1. Download the file
+2. Unzip the (zip)file
+3. Open the terminal(or command)
+4. Move into the dir that launch file exists (> cd ./SnakeGame_ncurses_master)
+5. launch (run)file (> ./run)
